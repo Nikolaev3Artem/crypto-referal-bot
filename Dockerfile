@@ -1,12 +1,12 @@
-FROM python:3.11.9-alpine
+FROM python:3.11.9
 
 WORKDIR /project
 
-COPY requirements.txt /project/requirements.txt
+COPY requirements/requirements_api.txt /project/requirements_api.txt
 
 
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install -r requirements_api.txt
 
 COPY . /project
 

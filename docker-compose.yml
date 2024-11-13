@@ -1,4 +1,4 @@
-version: "2.4"
+version: "3.8"
 
 
 services:
@@ -25,18 +25,17 @@ services:
       - "8000:8000"
     volumes:
       - .:/project
-
     command: bash entrypoint.sh
 
   telegram_bot:
     restart: always
     build: 
-      context: ./bot
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./bot/Dockerfile
     command: 
       - /bin/sh
       - '-c'
-      - './entrypoint.sh'
+      - './bot/entrypoint.sh'
 
     ports:
       - 6000:6000
