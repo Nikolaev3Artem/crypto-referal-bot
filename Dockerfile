@@ -2,10 +2,11 @@ FROM python:3.11.9
 
 WORKDIR /project
 
-COPY requirements/requirements_api.txt /project/requirements_api.txt
-
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 RUN pip install --upgrade pip
+COPY requirements/requirements_api.txt /project/requirements_api.txt
 RUN pip install -r requirements_api.txt
 
 COPY . /project
