@@ -1,0 +1,22 @@
+[tool.black]
+line-length = 120
+multi_line_output = 3
+include = '\.pyi?$'
+extend-exclude = '''
+(
+    ^/ pyproject.toml
+    | migrations
+    | .git
+    | .pytest_cache
+    | __pycache__
+    | .venv
+    | env
+    | venv
+)
+'''
+
+[tool.isort]
+profile = "black"
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true

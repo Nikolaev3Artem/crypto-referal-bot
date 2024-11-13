@@ -1,0 +1,45 @@
+version: "3.8"
+
+
+services:
+  postgres:
+    image: postgres:13.3-alpine
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    container_name: backend
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file: .env
+    expose:
+      - 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/project
+    command: bash entrypoint.sh
+
+  telegram_bot:
+    restart: always
+    build: 
+      context: .
+      dockerfile: ./bot/Dockerfile
+    command: 
+      - /bin/sh
+      - '-c'
+      - './bot/entrypoint.sh'
+
+    env_file:
+      .env
+
+volumes:
+  pg_data:
