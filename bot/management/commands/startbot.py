@@ -13,29 +13,14 @@ class Command(BaseCommand):
         bot = Bot(token=settings.BOT_TOKEN)
         dp = Dispatcher(bot)
 
-        # async def handle_button_click(callback_query: types.CallbackQuery, network_name: str):
-        #     await bot.answer_callback_query(callback_query.id)
-        #     await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {network_name}")
-
-        #     @dp.message_handler(lambda message: message.from_user.id == callback_query.from_user.id)
-        #     async def handle_user_message(message: types.Message):
-        #         user_input = message.text
-        #         print(network_name)
-        #         await message.reply(f"Вы ввели: {user_input}")
-        #         dp.message_handlers.unregister(handle_user_message)
-
-        #     print(network_name)
-
         @dp.message_handler(commands=["start"])
         async def send_welcome(message: types.Message):
-
-            keyboard = start_keyboard
             await message.answer(
                 """
         Добро пожаловать на Olegobot, этот бот предназначен для дропов. Пожалуйста введите адрес своего кошелька,
         поставьте 0 если у вас нет его в этой сети, то нужно заполнить хотя бы 1 адрес.
                 """,
-                reply_markup=keyboard,
+                reply_markup=start_keyboard,
             )
 
         @dp.message_handler(commands=["account"])
@@ -119,17 +104,15 @@ $brett хотя бы на 5 долларов, и рассылаем им пре�
             await bot.answer_callback_query(callback_query.id)
             await bot.send_message(callback_query.from_user.id, "Адрес записан")
             # Если неудача то даем ему кнопки для ввода
-            keyboard = start_keyboard
             await bot.send_message(
-                callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=keyboard
+                callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
             )
 
         @dp.callback_query_handler(lambda c: c.data == "no")
         async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
             await bot.answer_callback_query(callback_query.id)
-            keyboard = start_keyboard
             await bot.send_message(
-                callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=keyboard
+                callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
             )
 
         executor.start_polling(dp, skip_updates=True)
