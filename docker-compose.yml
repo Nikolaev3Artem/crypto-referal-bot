@@ -18,7 +18,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: ./Dockerfile_back
+      dockerfile: ./Dockerfile
     env_file: .env
     expose:
       - 8000
@@ -32,12 +32,13 @@ services:
     restart: always
     build: 
       context: .
-      dockerfile: ./Dockerfile_bot
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/project
     command: 
       - /bin/sh
       - '-c'
       - './entrypoint_bot.sh'
-
     env_file:
       .env
 

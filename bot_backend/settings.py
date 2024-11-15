@@ -23,9 +23,6 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split()
 # Application definition
 APPS = ["backend", "bot"]
 
-THIRD_PARTY_APPS = [
-    "rest_framework",
-]
 
 BASIC = [
     "django.contrib.admin",
@@ -36,7 +33,7 @@ BASIC = [
     "django.contrib.staticfiles",
 ]
 
-INSTALLED_APPS = BASIC + THIRD_PARTY_APPS + APPS
+INSTALLED_APPS = BASIC + APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

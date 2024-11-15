@@ -5,12 +5,12 @@ from backend.constants.enums import BlockchainEnum
 
 class Users(models.Model):
     id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=255, blank=False, null=False, default="")
-    user_id = models.IntegerField(blank=False, null=False)
-    referral_link = models.CharField(max_length=500, blank=False, null=False, default="")
-    points = models.FloatField(blank=False, null=False, default=0.0)
-    language = models.CharField(max_length=100, blank=True, null=True, default="")
-    bio = models.CharField(max_length=255, blank=True, null=True, default="")
+    username = models.CharField(max_length=255, blank=False, default="None")
+    user_id = models.IntegerField(blank=False)
+    referral_link = models.CharField(max_length=500, blank=False, default="None")
+    points = models.FloatField(blank=False, default=0.0)
+    language = models.CharField(max_length=100, blank=True, null=True, default="None")
+    bio = models.CharField(max_length=255, blank=True, null=True, default="None")
 
     invited_by = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=False, related_name="referrals")
 
@@ -22,13 +22,13 @@ class Addresses(models.Model):
     id = models.AutoField(primary_key=True)
     address = models.CharField(max_length=300, blank=False)
     owner_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="user")
-    balance = models.FloatField(blank=False, null=False, default=0.0)
+    balance = models.FloatField(blank=False, default=0.0)
     blockchain = models.CharField(choices=BlockchainEnum.choices, blank=False)
 
 
 class Airdrops(models.Model):
     id = models.AutoField(primary_key=True)
-    points = models.FloatField(blank=False, null=False, default=0.0)
+    points = models.FloatField(blank=False, default=0.0)
     users = models.ManyToManyField(Users, related_name="airdrop")
 
     class Meta:
@@ -38,7 +38,7 @@ class Airdrops(models.Model):
 
 class Mailings(models.Model):
     id = models.AutoField(primary_key=True)
-    message = models.CharField(max_length=3000, blank=False, null=False, default="")
+    message = models.CharField(max_length=3000, blank=False, default="None")
     users = models.ManyToManyField(Users, related_name="airdrops")
 
     class Meta:
@@ -51,9 +51,9 @@ class Mailings(models.Model):
 
 class PointCoefficients(models.Model):
     id = models.AutoField(primary_key=True)
-    first_level_ref = models.FloatField(blank=False, null=False, default=0.0)
-    second_level_ref = models.FloatField(blank=False, null=False, default=0.0)
-    on_connection = models.FloatField(blank=False, null=False, default=0.0)
+    first_level_ref = models.FloatField(blank=False, default=0.0)
+    second_level_ref = models.FloatField(blank=False, default=0.0)
+    on_connection = models.FloatField(blank=False, default=0.0)
 
     class Meta:
         verbose_name = "Coefficient"

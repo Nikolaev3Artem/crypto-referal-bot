@@ -1,9 +1,8 @@
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.types import InlineKeyboardMarkup
 from django.core.management.base import BaseCommand
 
 from core.settings import settings
-from utils.base_keyboard import button_base, button_bsc, button_ethereum, button_polygon, button_solana, button_tron
+from utils.base_keyboard import start_keyboard, user_choice_keyboard
 
 
 class Command(BaseCommand):
@@ -14,23 +13,23 @@ class Command(BaseCommand):
         bot = Bot(token=settings.BOT_TOKEN)
         dp = Dispatcher(bot)
 
-        async def handle_button_click(callback_query: types.CallbackQuery, network_name: str):
-            await bot.answer_callback_query(callback_query.id)
-            await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {network_name}")
+        # async def handle_button_click(callback_query: types.CallbackQuery, network_name: str):
+        #     await bot.answer_callback_query(callback_query.id)
+        #     await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {network_name}")
 
-            @dp.message_handler(lambda message: message.from_user.id == callback_query.from_user.id)
-            async def handle_user_message(message: types.Message):
-                user_input = message.text
-                await message.reply(f"Вы ввели: {user_input}")
+        #     @dp.message_handler(lambda message: message.from_user.id == callback_query.from_user.id)
+        #     async def handle_user_message(message: types.Message):
+        #         user_input = message.text
+        #         print(network_name)
+        #         await message.reply(f"Вы ввели: {user_input}")
+        #         dp.message_handlers.unregister(handle_user_message)
 
-                dp.message_handlers.unregister(handle_user_message)
+        #     print(network_name)
 
         @dp.message_handler(commands=["start"])
         async def send_welcome(message: types.Message):
 
-            keyboard = InlineKeyboardMarkup(row_width=2).add(
-                button_bsc, button_base, button_ethereum, button_polygon, button_solana, button_tron
-            )
+            keyboard = start_keyboard
             await message.answer(
                 """
         Добро пожаловать на Olegobot, этот бот предназначен для дропов. Пожалуйста введите адрес своего кошелька,
@@ -38,21 +37,6 @@ class Command(BaseCommand):
                 """,
                 reply_markup=keyboard,
             )
-
-        @dp.callback_query_handler(lambda c: c.data in ["ethereum", "base", "polygon", "solana", "bsc", "tron"])
-        async def process_callback_button(callback_query: types.CallbackQuery):
-            network_mapping = {
-                "ethereum": "Ethereum",
-                "base": "Base",
-                "polygon": "Polygon",
-                "solana": "Solana",
-                "bsc": "BSC",
-                "tron": "Tron",
-            }
-
-            network_name = network_mapping.get(callback_query.data)
-            if network_name:
-                await handle_button_click(callback_query, network_name)
 
         @dp.message_handler(commands=["account"])
         async def send_acc_info(message: types.Message):
@@ -92,6 +76,60 @@ $brett хотя бы на 5 долларов, и рассылаем им пре�
 Поинты можно заработать не только заполнением анкет или приглашением друзей - следите за нашими рассылками в боте!\n
 Иногда мы будем просто раздавать поинты в честь каких-либо событий (например,\t
 10.000 пользователей или 25.000 пользователей бота - чем не повод всех порадовать)."""
+            )
+
+        @dp.callback_query_handler(lambda c: c.data == "ethereum")
+        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+            await bot.answer_callback_query(callback_query.id)
+            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Ethereum")
+
+        @dp.callback_query_handler(lambda c: c.data == "base")
+        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+            await bot.answer_callback_query(callback_query.id)
+            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Base")
+
+        @dp.callback_query_handler(lambda c: c.data == "polygon")
+        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+            await bot.answer_callback_query(callback_query.id)
+            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Polygon")
+
+        @dp.callback_query_handler(lambda c: c.data == "solana")
+        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+            await bot.answer_callback_query(callback_query.id)
+            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Solana")
+
+        @dp.callback_query_handler(lambda c: c.data == "bsc")
+        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+            await bot.answer_callback_query(callback_query.id)
+            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети BSC")
+
+        @dp.callback_query_handler(lambda c: c.data == "tron")
+        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+            await bot.answer_callback_query(callback_query.id)
+            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Tron")
+
+        @dp.message_handler()
+        async def echo_user_input(message: types.Message):
+            keyboard = user_choice_keyboard
+            await message.answer("Подтверждаете адрес?", reply_markup=keyboard)
+            dp.message_handlers.unregister(echo_user_input)
+
+        @dp.callback_query_handler(lambda c: c.data == "yes")
+        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+            await bot.answer_callback_query(callback_query.id)
+            await bot.send_message(callback_query.from_user.id, "Адрес записан")
+            # Если неудача то даем ему кнопки для ввода
+            keyboard = start_keyboard
+            await bot.send_message(
+                callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=keyboard
+            )
+
+        @dp.callback_query_handler(lambda c: c.data == "no")
+        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+            await bot.answer_callback_query(callback_query.id)
+            keyboard = start_keyboard
+            await bot.send_message(
+                callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=keyboard
             )
 
         executor.start_polling(dp, skip_updates=True)
