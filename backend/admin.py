@@ -7,7 +7,7 @@ from .models import BotMessages
 
 @admin.register(BotMessages)
 class BotMessagesAdmin(admin.ModelAdmin):
-    fields = ["title", "message"]
+    fields = ["title"]
 
 
 # admin.site.register(BotMessages, BotMessagesAdmin)

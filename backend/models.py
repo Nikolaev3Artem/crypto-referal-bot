@@ -1,28 +1,21 @@
 from django.db import models
 
+from backend.constants.enums import BlockchainEnum
+
 
 class Users(models.Model):
     id = models.AutoField(primary_key=True)
-    username = models.CharField(
-        max_length=255, blank=False, null=False
-    )  # но если ник как у Unknown где просто пробелы или нету ника
+    username = models.CharField(max_length=255, blank=False, null=False, default="")
     user_id = models.IntegerField(blank=False, null=False)
-    referral_link = models.CharField(max_length=500, blank=False, null=False)
+    referral_link = models.CharField(max_length=500, blank=False, null=False, default="")
     points = models.FloatField(blank=False, null=False, default=0.0)
-    language = models.CharField(max_length=100, blank=True, null=True)
-    bio = models.CharField(max_length=140, blank=True, null=True)
+    language = models.CharField(max_length=100, blank=True, null=True, default="")
+    bio = models.CharField(max_length=255, blank=True, null=True, default="")
 
-    invited_by = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, related_name="referrals")
+    invited_by = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=False, related_name="referrals")
 
     def __str__(self):
         return self.user_id
-
-
-class BlockchainEnum(models.TextChoices):
-    ETHBASEPLGN = "eth/base/plgn", "Ethereum/Base/Polygon"
-    SOLANA = "solana", "Solana"
-    TRON = "tron", "Tron"
-    BSC = "bsc", "BSC"
 
 
 class Addresses(models.Model):
@@ -35,22 +28,22 @@ class Addresses(models.Model):
 
 class Airdrops(models.Model):
     id = models.AutoField(primary_key=True)
-    points = models.IntegerField(blank=False)
+    points = models.FloatField(blank=False, null=False, default=0.0)
     users = models.ManyToManyField(Users, related_name="airdrop")
 
     class Meta:
-        verbose_name = "Аирдроп"
-        verbose_name_plural = "Аирдропы"
+        verbose_name = "Airdrop"
+        verbose_name_plural = "Airdrops"
 
 
 class Mailings(models.Model):
     id = models.AutoField(primary_key=True)
-    message = models.CharField(max_length=3000)
+    message = models.CharField(max_length=3000, blank=False, null=False, default="")
     users = models.ManyToManyField(Users, related_name="airdrops")
 
     class Meta:
-        verbose_name = "Рассылка"
-        verbose_name_plural = "Рассылки"
+        verbose_name = "Mailing"
+        verbose_name_plural = "Mailings"
 
     def __str__(self):
         return self.message
@@ -58,23 +51,23 @@ class Mailings(models.Model):
 
 class PointCoefficients(models.Model):
     id = models.AutoField(primary_key=True)
-    first_level_ref = models.FloatField(blank=False, default=0.0)
-    second_level_ref = models.FloatField(blank=False, default=0.0)
-    on_connection = models.FloatField(blank=False, default=0.0)
+    first_level_ref = models.FloatField(blank=False, null=False, default=0.0)
+    second_level_ref = models.FloatField(blank=False, null=False, default=0.0)
+    on_connection = models.FloatField(blank=False, null=False, default=0.0)
 
     class Meta:
-        verbose_name = "Коефициент"
-        verbose_name_plural = "Коефициенты"
+        verbose_name = "Coefficient"
+        verbose_name_plural = "Coefficients"
 
 
 class BotMessages(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=200, blank=False)
-    message = models.CharField(max_length=3000, blank=False)
+    title = models.CharField(max_length=200, blank=False, null=False, default="")
+    message = models.CharField(max_length=3000, blank=False, null=False, default="")
 
     class Meta:
-        verbose_name = "Сообщение бота"
-        verbose_name_plural = "Сообщения бота"
+        verbose_name = "Message to bot"
+        verbose_name_plural = "Messages to bot"
 
     def __str__(self):
         return self.title
