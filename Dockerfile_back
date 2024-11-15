@@ -11,4 +11,4 @@ RUN pip install -r requirements_api.txt
 
 COPY . /project
 
-RUN ["chmod", "+x", "/project/entrypoint.sh"]
+RUN ["chmod", "+x", "/project/entrypoint_back.sh"]

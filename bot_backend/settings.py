@@ -21,9 +21,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split()
 
 
 # Application definition
-APPS = [
-    "backend",
-]
+APPS = ["backend", "bot"]
 
 THIRD_PARTY_APPS = [
     "rest_framework",

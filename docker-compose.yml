@@ -18,7 +18,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile_back
     env_file: .env
     expose:
       - 8000
@@ -26,17 +26,17 @@ services:
       - "8000:8000"
     volumes:
       - .:/project
-    command: bash entrypoint.sh
+    command: bash entrypoint_back.sh
 
   telegram_bot:
     restart: always
     build: 
       context: .
-      dockerfile: ./bot/Dockerfile
+      dockerfile: ./Dockerfile_bot
     command: 
       - /bin/sh
       - '-c'
-      - './bot/entrypoint.sh'
+      - './entrypoint_bot.sh'
 
     env_file:
       .env
