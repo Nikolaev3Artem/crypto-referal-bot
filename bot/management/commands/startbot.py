@@ -1,18 +1,28 @@
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage  # Импорт
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from django.core.management.base import BaseCommand
 
 from core.settings import settings
 from utils.base_keyboard import choice_yes_no_keyboard, start_keyboard
 
+# Создаем класс для состояний
+
+
+class Form(StatesGroup):
+    waiting_for_address = State()  # Ожидаем ввод адреса
+
 
 class Command(BaseCommand):
     help = "Launching the bot using the command"
 
     def handle(self, *args, **options):
-
+        storage = MemoryStorage()  # Использ
         bot = Bot(token=settings.BOT_TOKEN)
-        dp = Dispatcher(bot)
+        dp = Dispatcher(bot, storage=storage)
 
         @dp.message_handler(commands=["start"])
         async def send_welcome(message: types.Message):
@@ -66,6 +76,7 @@ $brett хотя бы на 5 долларов, и рассылаем им пре�
 
         @dp.callback_query_handler(lambda c: c.data == "yes")
         async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+            print(callback_query.data)
             await bot.answer_callback_query(callback_query.id)
             await bot.send_message(callback_query.from_user.id, "Адрес записан")
             # Если неудача то даем ему кнопки для ввода
@@ -75,6 +86,7 @@ $brett хотя бы на 5 долларов, и рассылаем им пре�
 
         @dp.callback_query_handler(lambda c: c.data == "no")
         async def process_callback_button_no(callback_query: types.CallbackQuery):
+            print(callback_query.data)
             await bot.answer_callback_query(callback_query.id)
             await bot.send_message(
                 callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
@@ -85,9 +97,15 @@ $brett хотя бы на 5 долларов, и рассылаем им пре�
             print(callback_query.data)
             await bot.answer_callback_query(callback_query.id)
             await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
+            # Переводим пользователя в состояние ожидания адреса
+            await Form.waiting_for_address.set()
 
-        @dp.message_handler()
-        async def echo_user_input(message: types.Message):
+        @dp.message_handler(state=Form.waiting_for_address)
+        async def process_address_input(message: types.Message, state: FSMContext):
+            # Получаем введённое пользователем сообщение
             await message.answer("Подтверждаете адрес?", reply_markup=choice_yes_no_keyboard)
+
+            # После того как адрес принят, завершаем состояние
+            await state.finish()
 
         executor.start_polling(dp, skip_updates=True)
