@@ -1,8 +1,9 @@
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from django.core.management.base import BaseCommand
 
 from core.settings import settings
-from utils.base_keyboard import start_keyboard, user_choice_keyboard
+from utils.base_keyboard import choice_yes_no_keyboard, start_keyboard
 
 
 class Command(BaseCommand):
@@ -63,42 +64,6 @@ $brett хотя бы на 5 долларов, и рассылаем им пре�
 10.000 пользователей или 25.000 пользователей бота - чем не повод всех порадовать)."""
             )
 
-        @dp.callback_query_handler(lambda c: c.data == "ethereum")
-        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
-            await bot.answer_callback_query(callback_query.id)
-            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Ethereum")
-
-        @dp.callback_query_handler(lambda c: c.data == "base")
-        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
-            await bot.answer_callback_query(callback_query.id)
-            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Base")
-
-        @dp.callback_query_handler(lambda c: c.data == "polygon")
-        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
-            await bot.answer_callback_query(callback_query.id)
-            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Polygon")
-
-        @dp.callback_query_handler(lambda c: c.data == "solana")
-        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
-            await bot.answer_callback_query(callback_query.id)
-            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Solana")
-
-        @dp.callback_query_handler(lambda c: c.data == "bsc")
-        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
-            await bot.answer_callback_query(callback_query.id)
-            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети BSC")
-
-        @dp.callback_query_handler(lambda c: c.data == "tron")
-        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
-            await bot.answer_callback_query(callback_query.id)
-            await bot.send_message(callback_query.from_user.id, "Введите ваш адрес для сети Tron")
-
-        @dp.message_handler()
-        async def echo_user_input(message: types.Message):
-            keyboard = user_choice_keyboard
-            await message.answer("Подтверждаете адрес?", reply_markup=keyboard)
-            dp.message_handlers.unregister(echo_user_input)
-
         @dp.callback_query_handler(lambda c: c.data == "yes")
         async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
             await bot.answer_callback_query(callback_query.id)
@@ -109,10 +74,20 @@ $brett хотя бы на 5 долларов, и рассылаем им пре�
             )
 
         @dp.callback_query_handler(lambda c: c.data == "no")
-        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
+        async def process_callback_button_no(callback_query: types.CallbackQuery):
             await bot.answer_callback_query(callback_query.id)
             await bot.send_message(
                 callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
             )
+
+        @dp.callback_query_handler()
+        async def process_callback_button_yes(callback_query: types.CallbackQuery):
+            print(callback_query.data)
+            await bot.answer_callback_query(callback_query.id)
+            await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
+
+        @dp.message_handler()
+        async def echo_user_input(message: types.Message):
+            await message.answer("Подтверждаете адрес?", reply_markup=choice_yes_no_keyboard)
 
         executor.start_polling(dp, skip_updates=True)
