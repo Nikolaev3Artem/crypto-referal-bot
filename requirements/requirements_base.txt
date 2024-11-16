@@ -3,3 +3,4 @@ pydantic-settings==2.6.1
 python-dotenv==1.0.0
 Django==4.2.6
 psycopg2-binary==2.9.10
+pydantic==2.7.0

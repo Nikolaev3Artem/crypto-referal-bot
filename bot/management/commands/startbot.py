@@ -6,9 +6,10 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from django.core.management.base import BaseCommand
 
+from backend.schemas.user import UserCreate
 from core.settings import settings
 from utils.base_keyboard import choice_yes_no_keyboard, start_keyboard
-
+from backend.services.user_service import user_repository
 
 class Form(StatesGroup):
     waiting_for_address = State()
@@ -25,6 +26,13 @@ class Command(BaseCommand):
 
         @dp.message_handler(commands=["start"])
         async def send_welcome(message: types.Message):
+            user = message['from']
+            user = UserCreate(
+                user_id = user['id'],
+                username = user['username'] if 'username' in user else None,
+                language = user['language_code'] if 'language_code' in user else None,
+            )
+            await user_repository.create_user(user)
             await message.answer(
                 """
         Добро пожаловать на Olegobot, этот бот предназначен для дропов. Пожалуйста введите адрес своего кошелька,

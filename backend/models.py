@@ -4,18 +4,17 @@ from backend.constants.enums import BlockchainEnum
 
 
 class Users(models.Model):
-    id = models.AutoField(primary_key=True)
+    user_id = models.BigIntegerField()
     username = models.CharField(max_length=255, blank=False, default="None")
-    user_id = models.IntegerField(blank=False)
     referral_link = models.CharField(max_length=500, blank=False, default="None")
     points = models.FloatField(blank=False, default=0.0)
     language = models.CharField(max_length=100, blank=True, null=True, default="None")
     bio = models.CharField(max_length=255, blank=True, null=True, default="None")
 
-    invited_by = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=False, related_name="referrals")
+    invited_by = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True, related_name="referrals")
 
     def __str__(self):
-        return self.user_id
+        return str(self.user_id)
 
 
 class Addresses(models.Model):
