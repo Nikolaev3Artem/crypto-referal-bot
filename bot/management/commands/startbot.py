@@ -9,11 +9,10 @@ from django.core.management.base import BaseCommand
 from core.settings import settings
 from utils.base_keyboard import choice_yes_no_keyboard, start_keyboard
 
-# Создаем класс для состояний
-
 
 class Form(StatesGroup):
-    waiting_for_address = State()  # Ожидаем ввод адреса
+    waiting_for_address = State()
+    waiting_for_confirmation = State()
 
 
 class Command(BaseCommand):
@@ -74,38 +73,42 @@ $brett хотя бы на 5 долларов, и рассылаем им пре�
 10.000 пользователей или 25.000 пользователей бота - чем не повод всех порадовать)."""
             )
 
-        @dp.callback_query_handler(lambda c: c.data == "yes")
-        async def process_callback_button_ethereum(callback_query: types.CallbackQuery):
-            print(callback_query.data)
-            await bot.answer_callback_query(callback_query.id)
-            await bot.send_message(callback_query.from_user.id, "Адрес записан")
-            # Если неудача то даем ему кнопки для ввода
-            await bot.send_message(
-                callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
-            )
+        @dp.callback_query_handler(lambda c: c.data in ["yes", "no"], state=Form.waiting_for_confirmation)
+        async def process_handler_button_yes_no(callback_query: types.CallbackQuery, state: FSMContext):
+            if callback_query.data == "yes":
+                print("Адрес подтвержден")
+                user_data = await state.get_data()
+                address = user_data.get("address")
+                selected_network = user_data.get("blockchain")
 
-        @dp.callback_query_handler(lambda c: c.data == "no")
-        async def process_callback_button_no(callback_query: types.CallbackQuery):
-            print(callback_query.data)
-            await bot.answer_callback_query(callback_query.id)
-            await bot.send_message(
-                callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
-            )
+                await bot.answer_callback_query(callback_query.id)
+                await bot.send_message(
+                    callback_query.from_user.id, f"Адрес {address} в сети {selected_network} записан"
+                )
+                await state.finish()
+            elif callback_query.data == "no":
+                await bot.send_message(
+                    callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
+                )
+                await state.finish()
 
-        @dp.callback_query_handler()
-        async def process_callback_button_yes(callback_query: types.CallbackQuery):
+        @dp.callback_query_handler(lambda c: c.data in ["Ethereum", "Base", "Polygon", "Solana", "BSC", "Tron"])
+        async def request_address(callback_query: types.CallbackQuery, state: FSMContext):
             print(callback_query.data)
+            blockchain = callback_query.data
+            await state.update_data(blockchain=blockchain)
+
             await bot.answer_callback_query(callback_query.id)
+
             await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
-            # Переводим пользователя в состояние ожидания адреса
             await Form.waiting_for_address.set()
 
         @dp.message_handler(state=Form.waiting_for_address)
-        async def process_address_input(message: types.Message, state: FSMContext):
-            # Получаем введённое пользователем сообщение
+        async def process_confirm_address(message: types.Message, state: FSMContext):
+            address = message.text
+            await state.update_data(address=address)
             await message.answer("Подтверждаете адрес?", reply_markup=choice_yes_no_keyboard)
 
-            # После того как адрес принят, завершаем состояние
-            await state.finish()
+            await Form.waiting_for_confirmation.set()
 
         executor.start_polling(dp, skip_updates=True)
