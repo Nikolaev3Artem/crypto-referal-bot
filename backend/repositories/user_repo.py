@@ -8,8 +8,7 @@ class UserRepository(BaseRepository):
     
     @sync_to_async
     def get_user(self, id: int) -> Users:
-        user = Users.objects.prefetch_related("invited_by").get(user_id=id)
-        return user
+        return Users.objects.prefetch_related("invited_by").get(user_id=id)
     
     @sync_to_async
     def create_user(self, user: UserCreate) -> Users:
