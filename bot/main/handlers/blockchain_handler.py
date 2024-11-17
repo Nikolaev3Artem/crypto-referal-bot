@@ -1,47 +1,54 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from bot.main.loader import bot, dp
+from backend.constants.enums import BlockchainEnum
+from bot.main.bot_instance import bot, dp
 from bot.main.states import BlockchainSurvey
 
 
-@dp.message_handler(commands=["Ethereum"])
-async def request_handler_ethereum(message: types.Message, state: FSMContext):
-    await state.update_data(message=message.text)
-    await bot.send_message(message.from_user.id, f"Введите ваш адрес для сети {message.text}")
+@dp.callback_query_handler(lambda c: c.data == BlockchainEnum.ETHEREUM)
+async def handle_callback_button_ethereum(callback_query: types.CallbackQuery, state: FSMContext):
+    await state.update_data(blockchain=callback_query.data)
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
     await BlockchainSurvey.address.set()
 
 
-@dp.message_handler(commands=["Base"])
-async def request_handler_base(message: types.Message, state: FSMContext):
-    await state.update_data(message=message.text)
-    await bot.send_message(message.from_user.id, f"Введите ваш адрес для сети {message.text}")
+@dp.callback_query_handler(lambda c: c.data == BlockchainEnum.BASE)
+async def handle_callback_button_base(callback_query: types.CallbackQuery, state: FSMContext):
+    await state.update_data(blockchain=callback_query.data)
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
     await BlockchainSurvey.address.set()
 
 
-@dp.message_handler(commands=["Polygon"])
-async def request_handler_polygon(message: types.Message, state: FSMContext):
-    await state.update_data(message=message.text)
-    await bot.send_message(message.from_user.id, f"Введите ваш адрес для сети {message.text}")
+@dp.callback_query_handler(lambda c: c.data == BlockchainEnum.POLYGON)
+async def handle_callback_button_polygon(callback_query: types.CallbackQuery, state: FSMContext):
+    await state.update_data(blockchain=callback_query.data)
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
     await BlockchainSurvey.address.set()
 
 
-@dp.message_handler(commands=["Solana"])
-async def request_handler_solana(message: types.Message, state: FSMContext):
-    await state.update_data(message=message.text)
-    await bot.send_message(message.from_user.id, f"Введите ваш адрес для сети {message.text}")
+@dp.callback_query_handler(lambda c: c.data == BlockchainEnum.SOLANA)
+async def handle_callback_button_solana(callback_query: types.CallbackQuery, state: FSMContext):
+    await state.update_data(blockchain=callback_query.data)
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
     await BlockchainSurvey.address.set()
 
 
-@dp.message_handler(commands=["BSC"])
-async def request_handler_bsc(message: types.Message, state: FSMContext):
-    await state.update_data(message=message.text)
-    await bot.send_message(message.from_user.id, f"Введите ваш адрес для сети {message.text}")
+@dp.callback_query_handler(lambda c: c.data == BlockchainEnum.TRON)
+async def handle_callback_button_tron(callback_query: types.CallbackQuery, state: FSMContext):
+    await state.update_data(blockchain=callback_query.data)
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
     await BlockchainSurvey.address.set()
 
 
-@dp.message_handler(commands=["Tron"])
-async def request_handler_tron(message: types.Message, state: FSMContext):
-    await state.update_data(message=message.text)
-    await bot.send_message(message.from_user.id, f"Введите ваш адрес для сети {message.text}")
+@dp.callback_query_handler(lambda c: c.data == BlockchainEnum.BSC)
+async def handle_callback_button_bsc(callback_query: types.CallbackQuery, state: FSMContext):
+    await state.update_data(blockchain=callback_query.data)
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
     await BlockchainSurvey.address.set()

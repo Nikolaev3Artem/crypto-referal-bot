@@ -2,8 +2,8 @@ from aiogram import types
 
 from backend.schemas.user import UserCreate
 from backend.services.user_service import user_repository
+from bot.main.bot_instance import dp
 from bot.main.keyboards.blockchain_survey import start_keyboard
-from bot.main.loader import dp
 
 
 @dp.message_handler(commands=["start"])

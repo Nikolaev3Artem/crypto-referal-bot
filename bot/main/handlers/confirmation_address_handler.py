@@ -1,10 +1,9 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from bot.main.keyboards.blockchain_survey import start_keyboard
+from bot.main.bot_instance import bot, dp
+from bot.main.keyboards.blockchain_survey import start_keyboard, user_confirmation_keyboard
 from bot.main.keyboards.command_button import command_keyboard
-from bot.main.keyboards.confirmation_survey import user_confirmation_keyboard
-from bot.main.loader import bot, dp
 from bot.main.states import BlockchainSurvey
 
 
@@ -13,8 +12,8 @@ async def process_handler_button_yes_no(callback_query: types.CallbackQuery, sta
     if callback_query.data == "yes":
         # user_data = await state.get_data()
         # address = user_data.get("address")
-        # selected_network = user_data.get("message")
-        # Для далекого будущего, не оставляй комент пжпжпжпж
+        # blockchain = user_data.get("blockchain")
+        # #для валидации определенного адреса и блокчейна
         await bot.answer_callback_query(callback_query.id)
         await bot.send_message(
             callback_query.from_user.id,
