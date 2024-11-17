@@ -1,122 +1,17 @@
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage  # Импорт
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
+from aiogram import executor
 from django.core.management.base import BaseCommand
 
-from backend.schemas.user import UserCreate
-from core.settings import settings
-from utils.base_keyboard import choice_yes_no_keyboard, start_keyboard
-from backend.services.user_service import user_repository
-
-class Form(StatesGroup):
-    waiting_for_address = State()
-    waiting_for_confirmation = State()
+from bot.main.handlers.confirmation_address_handler import process_handler_button_yes_no
+from bot.main.handlers.message_handler import handle_message
+from bot.main.loader import dp
 
 
 class Command(BaseCommand):
     help = "Launching the bot using the command"
 
     def handle(self, *args, **options):
-        storage = MemoryStorage()  # Использ
-        bot = Bot(token=settings.BOT_TOKEN)
-        dp = Dispatcher(bot, storage=storage)
 
-        @dp.message_handler(commands=["start"])
-        async def send_welcome(message: types.Message):
-            user = message['from']
-            user = UserCreate(
-                user_id = user['id'],
-                username = user['username'] if 'username' in user else None,
-                language = user['language_code'] if 'language_code' in user else None,
-            )
-            await user_repository.create_user(user)
-            await message.answer(
-                """
-        Добро пожаловать на Olegobot, этот бот предназначен для дропов. Пожалуйста введите адрес своего кошелька,
-        поставьте 0 если у вас нет его в этой сети, то нужно заполнить хотя бы 1 адрес.
-                """,
-                reply_markup=start_keyboard,
-            )
-
-        @dp.message_handler(commands=["account"])
-        async def send_acc_info(message: types.Message):
-            await message.reply(
-                """
-        Твои адреса:
-        1. ETH/BASE/POLY:
-        2. Solana
-        3. BSC
-        4. Tron
-
-        Твоя рефка (ссылка)
-
-        Рефералов: n
-
-        Баллов: n Olegopoints
-                """
-            )
-
-        @dp.message_handler(commands=["help"])
-        async def send_help(message: types.Message):
-            await message.reply(
-                """
-Всё очень просто. Вы заполняете ваши криптоадреса и получаете за это поинты.\n
-Приглашаете своих друзей заполнить их данные - и ваши друзья получат х2 от
-обычного количества поинтов за анкету, а вы получите бонус Y поинтов за каждого.\n
-Зачем нужны поинты?\n
-Представьте, что какой-то новый токен хочет обратить на себя внимание холдеров токена $brett.\n
-Они обращаются к нам и говорят - мы готовы дать аирдропом 5% нашего токена всем активным холдерам $brett.\n
-Мы проверяем этот новый токен на отсутствие скама (высокий налог на продажу, минтабл, 90% сапплая у команды и т.д.)\n
-Если всё ок - мы выбираем из нашей базы анкет всех, кто держит сейчас 
-$brett хотя бы на 5 долларов, и рассылаем им предложение получить аирдроп.\n
-Всем, кто соглашается, мы присылаем аирдроп пропорционально их поинтам.\n
-То есть, например, у нас есть 1.000.000 токенов на аирдроп и 100 человек согласилось его получить.\n
-У них всех в сумме 20.000 поинтов - значит, мы раздадим токенов из расчёта 50 токенов за 1 
-поинт. Если у вас 100 поинтов - получите 5000 токенов, если 200 - то получите 10000 токенов.\n\n
-Поинты можно заработать не только заполнением анкет или приглашением друзей - следите за нашими рассылками в боте!\n
-Иногда мы будем просто раздавать поинты в честь каких-либо событий (например,\t
-10.000 пользователей или 25.000 пользователей бота - чем не повод всех порадовать)."""
-            )
-
-        @dp.callback_query_handler(lambda c: c.data in ["yes", "no"], state=Form.waiting_for_confirmation)
-        async def process_handler_button_yes_no(callback_query: types.CallbackQuery, state: FSMContext):
-            if callback_query.data == "yes":
-                print("Адрес подтвержден")
-                user_data = await state.get_data()
-                address = user_data.get("address")
-                selected_network = user_data.get("blockchain")
-
-                await bot.answer_callback_query(callback_query.id)
-                await bot.send_message(
-                    callback_query.from_user.id, f"Адрес {address} в сети {selected_network} записан"
-                )
-                await state.finish()
-            elif callback_query.data == "no":
-                await bot.send_message(
-                    callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
-                )
-                await state.finish()
-
-        @dp.callback_query_handler(lambda c: c.data in ["Ethereum", "Base", "Polygon", "Solana", "BSC", "Tron"])
-        async def request_address(callback_query: types.CallbackQuery, state: FSMContext):
-            print(callback_query.data)
-            blockchain = callback_query.data
-            await state.update_data(blockchain=blockchain)
-
-            await bot.answer_callback_query(callback_query.id)
-
-            await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
-            await Form.waiting_for_address.set()
-
-        @dp.message_handler(state=Form.waiting_for_address)
-        async def process_confirm_address(message: types.Message, state: FSMContext):
-            address = message.text
-            await state.update_data(address=address)
-            await message.answer("Подтверждаете адрес?", reply_markup=choice_yes_no_keyboard)
-
-            await Form.waiting_for_confirmation.set()
+        dp.register_message_handler(handle_message)
+        dp.register_callback_query_handler(process_handler_button_yes_no)
 
         executor.start_polling(dp, skip_updates=True)
