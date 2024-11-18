@@ -1,5 +1,5 @@
-import os
-import sys
+# import os
+# import sys
 
 from aiogram import executor
 from django.core.management.base import BaseCommand
@@ -20,8 +20,8 @@ from bot.main.handlers.message_handler import handle_message
 class Command(BaseCommand):
     help = "Launching the bot using the command"
 
-    def restart_bot(self):
-        os.execv(sys.executable, ["python"] + sys.argv)
+    # def restart_bot(self):
+    #     os.execv(sys.executable, ["python"] + sys.argv)
 
     def handle(self, *args, **options):
 
@@ -37,4 +37,4 @@ class Command(BaseCommand):
         )
 
         executor.start_polling(dp, skip_updates=True)
-        self.restart_bot()
+        # self.restart_bot()

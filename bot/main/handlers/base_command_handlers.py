@@ -8,13 +8,16 @@ from bot.main.keyboards.blockchain_survey import start_keyboard
 
 @dp.message_handler(commands=["start"])
 async def send_welcome(message: types.Message):
-    user = message["from"]
-    user = UserCreate(
-        user_id=user["id"],
-        username=user["username"] if "username" in user else None,
-        language=user["language_code"] if "language_code" in user else None,
-    )
-    await user_repository.create_user(user)
+    try:
+        await user_repository.get_user(message["from"]["id"])
+    except Exception:
+        user = message["from"]
+        user = UserCreate(
+            user_id=user["id"],
+            username=user["username"] if "username" in user else None,
+            language=user["language_code"] if "language_code" in user else None,
+        )
+        await user_repository.create_user(user)
     await message.answer(
         """
 Добро пожаловать на Olegobot, этот бот предназначен для дропов. Пожалуйста введите адрес своего кошелька,
