@@ -2,7 +2,8 @@ from aiogram import types
 
 from backend.schemas.user import UserCreate
 from backend.services.user_service import user_repository
-from bot.main.bot_instance import dp
+from bot.main.bot_instance import bot, dp
+from bot.main.constants.enums import StartMenuEnum
 from bot.main.keyboards.blockchain_survey import start_keyboard
 
 
@@ -24,9 +25,11 @@ async def send_welcome(message: types.Message):
     )
 
 
-@dp.message_handler(commands=["account"])
-async def send_acc_info(message: types.Message):
-    await message.reply(
+@dp.callback_query_handler(lambda c: c.data == StartMenuEnum.ACCOUNT)
+async def send_acc_info(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(
+        callback_query.from_user.id,
         """
 Твои адреса:
 1. ETH/BASE/POLY:
@@ -39,13 +42,15 @@ async def send_acc_info(message: types.Message):
 Рефералов: n
 
 Баллов: n Olegopoints
-        """
+        """,
     )
 
 
-@dp.message_handler(commands=["help"])
-async def send_help(message: types.Message):
-    await message.reply(
+@dp.callback_query_handler(lambda c: c.data == StartMenuEnum.HELP)
+async def send_help(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(
+        callback_query.from_user.id,
         """
 Всё очень просто. Вы заполняете ваши криптоадреса и получаете за это поинты.\n
 Приглашаете своих друзей заполнить их данные - и ваши друзья получат х2 от
@@ -62,5 +67,5 @@ $brett хотя бы на 5 долларов, и рассылаем им пре�
 поинт. Если у вас 100 поинтов - получите 5000 токенов, если 200 - то получите 10000 токенов.\n\n
 Поинты можно заработать не только заполнением анкет или приглашением друзей - следите за нашими рассылками в боте!\n
 Иногда мы будем просто раздавать поинты в честь каких-либо событий (например,\t
-10.000 пользователей или 25.000 пользователей бота - чем не повод всех порадовать)."""
+10.000 пользователей или 25.000 пользователей бота - чем не повод всех порадовать).""",
     )

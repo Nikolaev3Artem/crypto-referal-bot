@@ -5,6 +5,7 @@ from aiogram import executor
 from django.core.management.base import BaseCommand
 
 from bot.main.bot_instance import dp
+from bot.main.handlers.base_command_handlers import send_acc_info, send_help
 from bot.main.handlers.blockchain_handler import (
     handle_callback_button_base,
     handle_callback_button_bsc,
@@ -14,7 +15,6 @@ from bot.main.handlers.blockchain_handler import (
     handle_callback_button_tron,
 )
 from bot.main.handlers.confirmation_address_handler import process_handler_button_yes_no
-from bot.main.handlers.message_handler import handle_message
 
 
 class Command(BaseCommand):
@@ -25,7 +25,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        dp.register_message_handler(handle_message)
         dp.register_callback_query_handler(
             process_handler_button_yes_no,
             handle_callback_button_ethereum,
@@ -34,6 +33,8 @@ class Command(BaseCommand):
             handle_callback_button_solana,
             handle_callback_button_tron,
             handle_callback_button_bsc,
+            send_acc_info,
+            send_help,
         )
 
         executor.start_polling(dp, skip_updates=True)

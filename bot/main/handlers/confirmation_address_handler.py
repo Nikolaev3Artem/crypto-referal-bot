@@ -11,8 +11,8 @@ from bot.main.states import BlockchainSurvey
 async def process_handler_button_yes_no(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.data == "yes":
         # user_data = await state.get_data()
-        # address = user_data.get("address")
-        # blockchain = user_data.get("blockchain")
+        # address = user_data.get("address", None)
+        # blockchain = user_data.get("blockchain", None)
         # #для валидации определенного адреса и блокчейна
         await bot.answer_callback_query(callback_query.id)
         await bot.send_message(
