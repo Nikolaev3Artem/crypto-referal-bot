@@ -16,10 +16,17 @@ class UserRepository(BaseRepository):
         return Users.objects.create(**user.dict())
 
     @sync_to_async
-    def reward_on_connection(self, id: int, points: float) -> Users:
-        user = Users.objects.get(user_id=id)
+    def reward_on_connection(self, user_id: int, points: float) -> Users:
+        user = Users.objects.get(user_id=user_id)
         user.points += points
         user.save()
         return user.points
 
+    @sync_to_async
+    def update_refferral_link_link(self, user_id: int, refferral_link: str) -> Users:
+        user = Users.objects.get(user_id=user_id)
+        user.referral_link = refferral_link
+        user.save()
+        return user.points
+    
 user_repository = UserRepository(model=Users)

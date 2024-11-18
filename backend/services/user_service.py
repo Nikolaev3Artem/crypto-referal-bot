@@ -16,4 +16,8 @@ class UserService():
     @staticmethod
     async def reward_on_connection(user_id: int):
         points = await PointCoefficientService.get_on_connection()
-        return await user_repository.reward_on_connection(id=user_id, points=points)
+        return await user_repository.reward_on_connection(user_id=user_id, points=points)
+    
+    @staticmethod
+    async def update_refferral_link_link(user_id: int, refferral_link: str):
+        return await user_repository.update_refferral_link_link(user_id=user_id, refferral_link=refferral_link)

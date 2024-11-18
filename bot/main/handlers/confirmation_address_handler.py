@@ -45,6 +45,8 @@ async def process_handler_button_yes_no(callback_query: types.CallbackQuery, sta
         )
         address = await BlockchainService.create_address(address)
         user_points = await UserService.reward_on_connection(user_id=user_id)
+        # refferral_link = await UserService.update_refferral_link_link(user_id=user_id, refferral_link="test_link") приклад для зміни лінки
+
         await bot.answer_callback_query(callback_query.id)
         await bot.send_message(
             callback_query.from_user.id, f"Отлично, адресс сохранен \n Вы получили {user_points}", reply_markup=start_keyboard
