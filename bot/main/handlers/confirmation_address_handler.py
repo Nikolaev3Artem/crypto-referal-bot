@@ -1,7 +1,10 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
+from backend.repositories.blockchain_repo import blockchain_repository
+from backend.repositories.user_repo import user_repository
 from backend.schemas.address import AddressCreate
+
 
 # from backend.schemas.user import UserBase
 from backend.services.blockchain_service import BlockchainService
@@ -9,10 +12,12 @@ from backend.repositories.blockchain_repo import blockchain_repository
 
 from backend.services.point_coefficient import PointCoefficientService
 from backend.services.user_service import UserService
+from backend.schemas.user import UserUpdate
 from bot.main.bot_instance import bot, dp
 from bot.main.keyboards.blockchain_survey import start_keyboard, user_confirmation_keyboard
 from bot.main.keyboards.command_button import command_keyboard
 from bot.main.states import BlockchainSurvey
+from core.settings import settings
 
 
 @dp.callback_query_handler(lambda c: c.data in ["yes", "no", "FinishSurvey"], state=BlockchainSurvey.confirmation)
@@ -62,6 +67,18 @@ async def process_handler_button_yes_no(callback_query: types.CallbackQuery, sta
         #     )
         #     await state.finish()
 
+        referral_link = f"https://t.me/{settings.BOT_NICKNAME}?start={callback_query['from']['id']}"
+        print(referral_link)
+        # await user_repository.update_user(user)
+#         await bot.answer_callback_query(callback_query.id)
+#         await bot.send_message(
+#             callback_query.from_user.id,
+#             f"""Спасибо! Свяжемся когда ваши активы заинтересуют нас.\n
+# Вот твоя реферальная ссылка {referral_link}\n
+# Делись с друзьями, за это ты будешь получать Олегобаллы, которые ты сможкешь использовать для...""",
+#             reply_markup=command_keyboard,
+#         )
+        await state.finish()
     elif callback_query.data == "no":
         await bot.send_message(
             callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
