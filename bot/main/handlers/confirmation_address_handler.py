@@ -46,12 +46,21 @@ async def process_handler_button_yes_no(callback_query: types.CallbackQuery, sta
         address = await BlockchainService.create_address(address)
         user_points = await UserService.reward_on_connection(user_id=user_id)
         # refferral_link = await UserService.update_refferral_link_link(user_id=user_id, refferral_link="test_link") приклад для зміни лінки
+        
+        # перевірка на валідність tron
+        # validation_address = await BlockchainService.validate_tron_address(address=address)
+        # if validation_address['status'] == 404:
+        #     await bot.send_message(
+        #         callback_query.from_user.id, validation_address['result'], reply_markup=start_keyboard
+        #     )
+        #     await state.finish()
 
-        await bot.answer_callback_query(callback_query.id)
-        await bot.send_message(
-            callback_query.from_user.id, f"Отлично, адресс сохранен \n Вы получили {user_points}", reply_markup=start_keyboard
-        )
-        await state.finish()
+        # if validation_address['status'] == 200:
+        #     await bot.answer_callback_query(callback_query.id)
+        #     await bot.send_message(
+        #         callback_query.from_user.id, f"Отлично, адресс сохранен \n Вы получили {user_points}", reply_markup=start_keyboard
+        #     )
+        #     await state.finish()
 
     elif callback_query.data == "no":
         await bot.send_message(

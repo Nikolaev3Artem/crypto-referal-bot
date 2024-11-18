@@ -19,6 +19,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split()
 
+ETHERSCAN_TOKEN = os.getenv("ETHERSCAN_TOKEN")
+ETHERSCAN_HOST = os.getenv("ETHERSCAN_HOST")
+TRONSCAN_HOST = os.getenv("TRONSCAN_HOST")
 
 # Application definition
 APPS = ["backend", "bot"]
