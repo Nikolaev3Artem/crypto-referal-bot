@@ -2,8 +2,11 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from backend.schemas.address import AddressCreate
+
+# from backend.schemas.user import UserBase
 from backend.services.blockchain_service import blockchain_repository
-from backend.services.user_service import user_repository
+
+# from backend.services.user_service import user_repository
 from bot.main.bot_instance import bot, dp
 from bot.main.keyboards.blockchain_survey import start_keyboard, user_confirmation_keyboard
 from bot.main.keyboards.command_button import command_keyboard
@@ -16,21 +19,18 @@ async def process_handler_button_yes_no(callback_query: types.CallbackQuery, sta
         user_data = await state.get_data()
         address = user_data.get("address")
         blockchain = user_data.get("blockchain")
-        print(callback_query["from"]["id"])
+        # print(callback_query["from"]["id"])
         # try:
         #     await blockchain_repository.get_address()
         # except Exception:
-        # owner = await user_repository.get_user(callback_query["from"]["id"])
+        # user = await user_repository.get_user(callback_query["from"]["id"])
         # owner = UserBase(
         #     user_id=callback_query["from"]["id"],
 
         # )
         address = AddressCreate(
             address=address,
-            owner_id=await user_repository.get_user(callback_query["from"]["id"]),
-            # owner_id = UserBase(
-            #     user_id = callback_query["from"]["id"],
-            # ),
+            owner_id=callback_query["from"]["id"],
             blockchain=blockchain,
         )
         await blockchain_repository.create_address(address)

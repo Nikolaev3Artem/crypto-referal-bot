@@ -4,7 +4,7 @@ from backend.constants.enums import BlockchainEnum
 
 
 class Users(models.Model):
-    user_id = models.BigIntegerField()
+    user_id = models.BigIntegerField(unique=True)
     username = models.CharField(max_length=255, blank=False, default="None")
     referral_link = models.CharField(max_length=500, blank=False, default="None")
     points = models.FloatField(blank=False, default=0.0)
