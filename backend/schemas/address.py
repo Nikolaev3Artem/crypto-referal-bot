@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.constants.enums import BlockchainEnum
 from backend.schemas.user import UserBase
@@ -6,8 +6,8 @@ from backend.schemas.user import UserBase
 
 class AddressBase(BaseModel):
     blockchain: BlockchainEnum
-    balance: float | None = None  # может временно
-    owner_id: UserBase
+    balance: float = Field(default=0.0)
+    owner_id: int
     address: str
 
 
