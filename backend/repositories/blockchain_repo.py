@@ -1,6 +1,6 @@
 from asgiref.sync import sync_to_async
 
-from backend.models import Addresses, Users
+from backend.models import Addresses
 from backend.schemas.address import AddressCreate, AddressUpdate
 from utils.base_repository import BaseRepository
 
@@ -23,6 +23,5 @@ class BlockchainRepository(BaseRepository):
     def address_exists_check(self, address: str) -> Addresses:
         address = self.model.objects.filter(address=address).first()
         return address
-
 
 blockchain_repository = BlockchainRepository(model=Addresses)

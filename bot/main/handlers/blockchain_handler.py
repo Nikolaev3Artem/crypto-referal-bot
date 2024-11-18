@@ -5,7 +5,7 @@ from backend.constants.enums import BlockchainEnum
 from bot.main.bot_instance import bot, dp
 from bot.main.states import BlockchainSurvey
 from bot.main.keyboards.command_button import command_keyboard
-
+from backend.services.blockchain_service import BlockchainService
 
 @dp.callback_query_handler(lambda c: c.data == BlockchainEnum.ETHEREUM)
 async def handle_callback_button_ethereum(callback_query: types.CallbackQuery, state: FSMContext):

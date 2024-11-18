@@ -7,6 +7,7 @@ from backend.schemas.address import AddressCreate
 from backend.services.blockchain_service import BlockchainService
 from backend.repositories.blockchain_repo import blockchain_repository
 
+from backend.services.point_coefficient import PointCoefficientService
 from backend.services.user_service import UserService
 from bot.main.bot_instance import bot, dp
 from bot.main.keyboards.blockchain_survey import start_keyboard, user_confirmation_keyboard
@@ -20,6 +21,7 @@ async def process_handler_button_yes_no(callback_query: types.CallbackQuery, sta
         user_data = await state.get_data()
         address = user_data.get("address")
         blockchain = user_data.get("blockchain")
+        user_id = callback_query["from"]["id"]
         # print(callback_query["from"]["id"])
         # try:
         #     await blockchain_repository.get_address()
@@ -38,14 +40,14 @@ async def process_handler_button_yes_no(callback_query: types.CallbackQuery, sta
         
         address = AddressCreate(
             address=address,
-            owner_id=callback_query["from"]["id"],
+            owner_id=user_id,
             blockchain=blockchain,
         )
         address = await BlockchainService.create_address(address)
-        
+        user_points = await UserService.reward_on_connection(user_id=user_id)
         await bot.answer_callback_query(callback_query.id)
         await bot.send_message(
-            callback_query.from_user.id, "Отлично, адресс сохранен", reply_markup=start_keyboard
+            callback_query.from_user.id, f"Отлично, адресс сохранен \n Вы получили {user_points}", reply_markup=start_keyboard
         )
         await state.finish()
 

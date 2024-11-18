@@ -25,6 +25,8 @@ services:
       - "8000:8000"
     volumes:
       - .:/backend
+      - .:/bot/bot_backend
+      - .:/bot
     command: bash entrypoint_back.sh
 
   telegram_bot:
@@ -33,6 +35,8 @@ services:
       context: .
       dockerfile: ./Dockerfile
     volumes:
+      - .:/backend
+      - .:/bot/bot_backend
       - .:/bot
     command:
       - /bin/sh

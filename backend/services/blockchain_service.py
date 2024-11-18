@@ -19,3 +19,27 @@ class BlockchainService:
     @staticmethod
     async def update_address(address: AddressUpdate):
         return await blockchain_repository.update_address(address)
+
+    @staticmethod
+    async def validate_etereum_address(self, address: str) -> bool:
+        return True
+    
+    @staticmethod
+    async def validate_base_address(self, address: str) -> bool:
+        return True
+    
+    @staticmethod
+    async def validate_polygon_address(self, address: str) -> bool:
+        return True
+    
+    @staticmethod
+    async def validate_solana_address(self, address: str) -> bool:
+        return True
+    
+    @staticmethod
+    async def validate_tron_address(self, address: str) -> bool:
+        return True
+    
+    @staticmethod
+    async def validate_bsc_address(self, address: str) -> bool:
+        return True
