@@ -13,13 +13,8 @@ class BlockchainService:
     @staticmethod
     async def create_address(address: AddressCreate):
         user = await UserService.get_user(id=address.owner_id)
-
-        if not user:
-            raise ValueError("User not found")
-
-        address_data = address.dict()
-        address_data["owner_id"] = user.id
-        return await blockchain_repository.create_address(AddressCreate(**address_data))
+        address.owner_id = user
+        return await blockchain_repository.create_address(address)
 
     @staticmethod
     async def update_address(address: AddressUpdate):

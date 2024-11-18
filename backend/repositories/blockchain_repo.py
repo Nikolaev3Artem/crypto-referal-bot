@@ -9,23 +9,20 @@ class BlockchainRepository(BaseRepository):
 
     @sync_to_async
     def get_address(self, id: int) -> Addresses:
-        return Addresses.objects.select_related("owner_id").prefetch_related("invited_by").get(id=id)
+        return self.model.objects.select_related("owner_id").prefetch_related("invited_by").get(id=id)
 
     @sync_to_async
     def create_address(self, address: AddressCreate):
-
-        owner = Users.objects.get(user_id=address.owner_id)
-
-        return self.model.objects.create(
-            address=address.address,
-            blockchain=address.blockchain,
-            balance=address.balance,
-            owner_id=owner,
-        )
+        return self.model.objects.create(**address.dict())
 
     @sync_to_async
     def update_address(self, address: AddressUpdate) -> Addresses:
         return
+
+    @sync_to_async
+    def address_exists_check(self, address: str) -> Addresses:
+        address = self.model.objects.filter(address=address).first()
+        return address
 
 
 blockchain_repository = BlockchainRepository(model=Addresses)

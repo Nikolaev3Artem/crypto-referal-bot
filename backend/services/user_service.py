@@ -6,7 +6,7 @@ class UserService():
     
     @staticmethod
     async def get_user(id: int) -> Users:
-        return await user_repository.get_user()
+        return await user_repository.get_user(id=id)
     
     @staticmethod
     async def create_user(user: UserCreate):
