@@ -1,15 +1,18 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
+from backend.constants.enums import BlockchainEnum
 from backend.repositories.blockchain_repo import blockchain_repository
 from backend.repositories.user_repo import user_repository
-from backend.schemas.address import AddressCreate
+
+# from backend.schemas.address import AddressCreate
 from backend.services.blockchain_service import BlockchainService
 from backend.services.user_service import UserService
 from bot.main.bot_instance import bot, dp
 from bot.main.keyboards.blockchain_survey import start_keyboard, user_confirmation_keyboard
 from bot.main.states import BlockchainSurvey
-from core.settings import settings
+
+# from core.settings import settings
 
 
 @dp.callback_query_handler(lambda c: c.data in ["yes", "no", "FinishSurvey"], state=BlockchainSurvey.confirmation)
@@ -28,38 +31,40 @@ async def process_handler_button_yes_no(callback_query: types.CallbackQuery, sta
             )
             await state.finish()
 
-        address = AddressCreate(
-            address=address,
-            owner_id=user_id,
-            blockchain=blockchain,
-        )
-        address = await BlockchainService.create_address(address)
+        # address = AddressCreate(
+        #     address=address,
+        #     owner_id=user_id,
+        #     blockchain=blockchain,
+        # )
+        # address = await BlockchainService.create_address(address)
         await UserService.reward_on_connection(user_id=user_id)
-        referrer_first = await user_repository.refferer_user_exist_first_level(user_id=user_id)
-        if referrer_first is not None:
+        if await user_repository.refferer_user_first_level(user_id=user_id) is not None:
             await UserService.reward_first_level(user_id=user_id)
-        referrer_second = await user_repository.refferer_user_exist_second_level(user_id=user_id)
-        if referrer_second is not None:
+        if await user_repository.refferer_user_second_level(user_id=user_id) is not None:
             await UserService.reward_second_level(user_id=user_id)
-        # перевірка на валідність tron
-        # validation_address = await BlockchainService.validate_tron_address(address=address)
-        # if validation_address['status'] == 404:
-        #     await bot.send_message(
-        #         callback_query.from_user.id, validation_address['result'], reply_markup=start_keyboard
-        #     )
-        #     await state.finish()
 
-        # if validation_address['status'] == 200:
-        #     await bot.answer_callback_query(callback_query.id)
-        #     await bot.send_message(
-        #         callback_query.from_user.id, f"Отлично, адресс сохранен \n Вы получили {user_points}",
-        #  reply_markup=start_keyboard
-        #     )
-        #     await state.finish()
-        await UserService.update_refferral_link_link(
-            user_id=user_id, refferral_link=f"https://t.me/{settings.BOT_NICKNAME}?start={callback_query['from']['id']}"
-        )
-        await state.finish()
+        # перевірка на валідність tron
+        if blockchain == BlockchainEnum.TRON:
+
+            validation_address = await BlockchainService.validate_tron_address(address=address)
+            if validation_address["status"] == 404:
+                await bot.send_message(
+                    callback_query.from_user.id, validation_address["result"], reply_markup=start_keyboard
+                )
+                await state.finish()
+
+            if validation_address["status"] == 200:
+                await bot.answer_callback_query(callback_query.id)
+                await bot.send_message(
+                    callback_query.from_user.id,
+                    "Отлично, адресс сохранен \n Вы получили ",  # {user_points}",
+                    reply_markup=start_keyboard,
+                )
+                await state.finish()
+
+        # if blockchain == "Ethereum"
+
+        # await state.finish()
     elif callback_query.data == "no":
         await bot.send_message(
             callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard

@@ -1,10 +1,13 @@
+import requests
+
 from backend.models import Addresses
 from backend.repositories.blockchain_repo import blockchain_repository
 from backend.schemas.address import AddressCreate, AddressUpdate
 from backend.services.user_service import UserService
-import requests
-from bot_backend.settings import ETHERSCAN_TOKEN, ETHERSCAN_HOST, TRONSCAN_HOST
-class BlockchainService():
+from bot_backend.settings import ETHERSCAN_HOST, ETHERSCAN_TOKEN, TRONSCAN_HOST
+
+
+class BlockchainService:
 
     @staticmethod
     async def get_address(id: int) -> Addresses:
@@ -22,33 +25,35 @@ class BlockchainService():
 
     @staticmethod
     async def validate_etereum_address(address: str) -> dict:
-        responce = requests.get(f'{ETHERSCAN_HOST}?chainid=1&module=account&action=tokentx&address={address}&apikey={ETHERSCAN_TOKEN}')
+        responce = requests.get(
+            f"{ETHERSCAN_HOST}?chainid=1&module=account&action=tokentx&address={address}&apikey={ETHERSCAN_TOKEN}"
+        )
         if responce.status_code == 200:
             return {"status": 200}
         elif responce.status_code == 0:
             return {"status": 404, "result": f"Такого адресса не существует: {address}"}
-    
+
     @staticmethod
     async def validate_base_address(address: str) -> bool:
         return True
-    
+
     @staticmethod
     async def validate_polygon_address(address: str) -> bool:
         return True
-    
+
     @staticmethod
     async def validate_solana_address(address: str) -> bool:
         return True
-    
+
     @staticmethod
     async def validate_tron_address(address: str) -> bool:
-        responce = requests.get(f'{TRONSCAN_HOST}?address={address}&asset_type=0')
-        print(responce.json())
-        if int(responce.data['token_value']) > 0:
-            return {"status": 200}
-        elif int(responce.data['token_value']) == 0:
+        responce = requests.get(f"{TRONSCAN_HOST}?address={address}&asset_type=0")
+        responce_data = responce.json()
+        if responce_data["data"][0] is None or float(responce_data["data"][0]["token_value"]) == 0:
             return {"status": 404, "result": f"Такого адресса не существует: {address}"}
-    
+        if float(responce_data["data"][0]["token_value"]) > 0:
+            return {"status": 200}
+
     @staticmethod
     async def validate_bsc_address(address: str) -> bool:
         return True

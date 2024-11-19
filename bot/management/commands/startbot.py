@@ -8,6 +8,7 @@ from bot.main.bot_instance import dp
 from bot.main.handlers.blockchain_handler import (
     handle_callback_button_base,
     handle_callback_button_bsc,
+    handle_callback_button_end,
     handle_callback_button_ethereum,
     handle_callback_button_polygon,
     handle_callback_button_solana,
@@ -30,6 +31,7 @@ class Command(BaseCommand):
             process_handler_button_yes_no,
             handle_callback_button_ethereum,
             handle_callback_button_base,
+            handle_callback_button_end,
             handle_callback_button_polygon,
             handle_callback_button_solana,
             handle_callback_button_tron,

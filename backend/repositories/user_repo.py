@@ -40,7 +40,7 @@ class UserRepository(BaseRepository):
         return user.invited_by
 
     @sync_to_async
-    def refferer_user_exist_first_level(self, user_id: int) -> Union[int, None]:
+    def refferer_user_first_level(self, user_id: int) -> Union[int, None]:
         user = self.model.objects.filter(user_id=user_id).first()
         if user.invited_by is not None:
             return user.invited_by.user_id
@@ -55,7 +55,7 @@ class UserRepository(BaseRepository):
         return user.points
 
     @sync_to_async
-    def refferer_user_exist_second_level(self, user_id: int) -> Union[int, None]:
+    def refferer_user_second_level(self, user_id: int) -> Union[int, None]:
         user = self.model.objects.filter(user_id=user_id).first()
         if user.invited_by is not None:
             user = self.model.objects.filter(user_id=user.invited_by.user_id).first()
