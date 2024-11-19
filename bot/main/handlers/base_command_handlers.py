@@ -1,7 +1,7 @@
 from aiogram import types
 
+from backend.repositories.user_repo import user_repository
 from backend.schemas.user import UserCreate
-from backend.services.user_service import user_repository
 from bot.main.bot_instance import dp
 from bot.main.keyboards.blockchain_survey import start_keyboard
 
@@ -11,13 +11,25 @@ async def send_welcome(message: types.Message):
     try:
         await user_repository.get_user(message["from"]["id"])
     except Exception:
-        user = message["from"]
-        user = UserCreate(
-            user_id=user["id"],
-            username=user["username"] if "username" in user else None,
-            language=user["language_code"] if "language_code" in user else None,
-        )
-        await user_repository.create_user(user)
+        if len(message.text) < 7 or str(message["from"]["id"]) == message.text[7:]:
+            user = message["from"]
+            user = UserCreate(
+                user_id=user["id"],
+                username=user["username"] if "username" in user else None,
+                language=user["language_code"] if "language_code" in user else None,
+            )
+            await user_repository.create_user(user)
+        else:
+            invited_by = message.text[7:]
+            user = message["from"]
+            user = UserCreate(
+                user_id=user["id"],
+                username=user["username"] if "username" in user else None,
+                language=user["language_code"] if "language_code" in user else None,
+            )
+            await user_repository.create_user(user)
+            await user_repository.update_invited_by(message["from"]["id"], invited_by=invited_by)
+
     await message.answer(
         """
 Добро пожаловать на Olegobot, этот бот предназначен для дропов. Пожалуйста введите адрес своего кошелька,
