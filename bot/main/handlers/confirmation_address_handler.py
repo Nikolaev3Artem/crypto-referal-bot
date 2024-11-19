@@ -1,81 +1,34 @@
 from aiogram import types
-from aiogram.dispatcher import FSMContext
 
-from backend.constants.enums import BlockchainEnum
-from backend.repositories.blockchain_repo import blockchain_repository
-from backend.repositories.user_repo import user_repository
-
-# from backend.schemas.address import AddressCreate
-from backend.services.blockchain_service import BlockchainService
-from backend.services.user_service import UserService
 from bot.main.bot_instance import bot, dp
+from bot.main.handlers.blockchain_handler import HANDLERS, user_state
 from bot.main.keyboards.blockchain_survey import start_keyboard, user_confirmation_keyboard
 from bot.main.states import BlockchainSurvey
 
-# from core.settings import settings
 
-
-@dp.callback_query_handler(lambda c: c.data in ["yes", "no", "FinishSurvey"], state=BlockchainSurvey.confirmation)
-async def process_handler_button_yes_no(callback_query: types.CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(lambda c: c.data in ["yes", "no"], state=BlockchainSurvey.confirmation)
+async def confirm_address(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
     if callback_query.data == "yes":
-        user_data = await state.get_data()
-        address = user_data.get("address")
-        blockchain = user_data.get("blockchain")
-        user_id = callback_query["from"]["id"]
-        address_exist = await blockchain_repository.address_exists_check(address=address)
-        if address_exist is not None:
-            await bot.send_message(
-                callback_query.from_user.id,
-                "Этот адресс уже используется, пожалуйста введите другой",
-                reply_markup=start_keyboard,
-            )
-            await state.finish()
+        blockchain = user_state[user_id]["blockchain"]
+        address = user_state[user_id]["address"]
 
-        # address = AddressCreate(
-        #     address=address,
-        #     owner_id=user_id,
-        #     blockchain=blockchain,
-        # )
-        # address = await BlockchainService.create_address(address)
-        await UserService.reward_on_connection(user_id=user_id)
-        if await user_repository.refferer_user_first_level(user_id=user_id) is not None:
-            await UserService.reward_first_level(user_id=user_id)
-        if await user_repository.refferer_user_second_level(user_id=user_id) is not None:
-            await UserService.reward_second_level(user_id=user_id)
-
-        # перевірка на валідність tron
-        if blockchain == BlockchainEnum.TRON:
-
-            validation_address = await BlockchainService.validate_tron_address(address=address)
-            if validation_address["status"] == 404:
-                await bot.send_message(
-                    callback_query.from_user.id, validation_address["result"], reply_markup=start_keyboard
-                )
-                await state.finish()
-
-            if validation_address["status"] == 200:
-                await bot.answer_callback_query(callback_query.id)
-                await bot.send_message(
-                    callback_query.from_user.id,
-                    "Отлично, адресс сохранен \n Вы получили ",  # {user_points}",
-                    reply_markup=start_keyboard,
-                )
-                await state.finish()
-
-        # if blockchain == "Ethereum"
-
-        # await state.finish()
-    elif callback_query.data == "no":
+        handler = HANDLERS[blockchain]
+        await handler(address, blockchain, user_id)
+    else:
+        user_state.pop(user_id)
         await bot.send_message(
             callback_query.from_user.id, "Пожалуйста, введите верный адрес", reply_markup=start_keyboard
         )
-        await state.finish()
 
 
-@dp.message_handler(state=BlockchainSurvey.address)
-async def process_confirm_address(message: types.Message, state: FSMContext):
-    address = message.text
-    await state.update_data(address=address)
-    await message.answer(f"Подтверждаете адрес {address}?", reply_markup=user_confirmation_keyboard)
+@dp.message_handler(
+    lambda message: message.from_user.id in user_state and "blockchain" in user_state[message.from_user.id],
+    state=BlockchainSurvey.address,
+)
+async def process_confirm_address(message: types.Message):
+    user_id = message.from_user.id
+    user_state[user_id]["address"] = message.text
 
+    await message.reply(f"Подтверджаете адрес {message.text}?", reply_markup=user_confirmation_keyboard)
     await BlockchainSurvey.confirmation.set()
