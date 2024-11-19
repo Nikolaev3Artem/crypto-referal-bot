@@ -13,3 +13,8 @@ class PointCoefficientService:
     async def get_on_first_level_referal() -> Users:
         point_coefficient = await point_coefficient_repository.get_coefficient()
         return point_coefficient.first_level_ref
+
+    @staticmethod
+    async def get_on_second_level_referal() -> Users:
+        point_coefficient = await point_coefficient_repository.get_coefficient()
+        return point_coefficient.second_level_ref

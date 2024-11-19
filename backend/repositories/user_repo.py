@@ -54,5 +54,22 @@ class UserRepository(BaseRepository):
         user.save()
         return user.points
 
+    @sync_to_async
+    def refferer_user_exist_second_level(self, user_id: int) -> Union[int, None]:
+        user = self.model.objects.filter(user_id=user_id).first()
+        if user.invited_by is not None:
+            user = self.model.objects.filter(user_id=user.invited_by.user_id).first()
+            if user.invited_by is not None:
+                return user.invited_by.user_id
+            else:
+                return None
+
+    @sync_to_async
+    def reward_second_level(self, user_id: int, points: float) -> int:
+        user = Users.objects.get(user_id=user_id)
+        user.points += points
+        user.save()
+        return user.points
+
 
 user_repository = UserRepository(model=Users)

@@ -28,3 +28,9 @@ class UserService:
         points = await PointCoefficientService.get_on_first_level_referal()
         user = await user_repository.refferer_user_exist_first_level(user_id=user_id)
         return await user_repository.reward_first_level(user_id=user, points=points)
+
+    @staticmethod
+    async def reward_second_level(user_id: int) -> int:
+        points = await PointCoefficientService.get_on_second_level_referal()
+        user = await user_repository.refferer_user_exist_second_level(user_id=user_id)
+        return await user_repository.reward_second_level(user_id=user, points=points)

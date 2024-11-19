@@ -38,6 +38,9 @@ async def process_handler_button_yes_no(callback_query: types.CallbackQuery, sta
         referrer_first = await user_repository.refferer_user_exist_first_level(user_id=user_id)
         if referrer_first is not None:
             await UserService.reward_first_level(user_id=user_id)
+        referrer_second = await user_repository.refferer_user_exist_second_level(user_id=user_id)
+        if referrer_second is not None:
+            await UserService.reward_second_level(user_id=user_id)
         # перевірка на валідність tron
         # validation_address = await BlockchainService.validate_tron_address(address=address)
         # if validation_address['status'] == 404:
