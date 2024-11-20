@@ -4,7 +4,7 @@ from backend.repositories.pointcoefficient_repo import point_coefficient_reposit
 class PointCoefficientService:
 
     @staticmethod
-    async def get_on_connection() -> float:
+    async def get_coefficient_points_on_connection() -> float:
         point_coefficient = await point_coefficient_repository.get_coefficient()
         return point_coefficient.on_connection
 

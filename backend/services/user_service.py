@@ -16,7 +16,7 @@ class UserService:
 
     @staticmethod
     async def reward_on_connection(user_id: int) -> float:
-        points = await PointCoefficientService.get_on_connection()
+        points = await PointCoefficientService.get_coefficient_points_on_connection()
         return await user_repository.reward_on_connection(user_id=user_id, points=points)
 
     @staticmethod
@@ -24,13 +24,13 @@ class UserService:
         return await user_repository.update_refferral_link_link(user_id=user_id, refferral_link=refferral_link)
 
     @staticmethod
-    async def reward_first_level(user_id: int) -> float:
+    async def reward_first_level(user_id: int):
         points = await PointCoefficientService.get_first_level_referral_points()
         user = await user_repository.refferer_user_first_level(user_id=user_id)
-        return await user_repository.reward_first_level(user_id=user, points=points)
+        await user_repository.reward_first_level(user_id=user, points=points)
 
     @staticmethod
-    async def reward_second_level(user_id: int) -> float:
+    async def reward_second_level(user_id: int):
         points = await PointCoefficientService.get_second_level_referral_points()
         user = await user_repository.refferer_user_second_level(user_id=user_id)
-        return await user_repository.reward_second_level(user_id=user, points=points)
+        await user_repository.reward_second_level(user_id=user, points=points)

@@ -50,9 +50,9 @@ class BlockchainService:
         responce = requests.get(f"{TRONSCAN_HOST}?address={address}&asset_type=0")
         responce_data = responce.json()
         if responce_data["data"][0] is None or float(responce_data["data"][0]["token_value"]) == 0:
-            return {"status": 404, "result": f"Такого адресса не существует: {address}"}
+            return False
         if float(responce_data["data"][0]["token_value"]) > 0:
-            return {"status": 200}
+            return True
 
     @staticmethod
     async def validate_bsc_address(address: str) -> bool:

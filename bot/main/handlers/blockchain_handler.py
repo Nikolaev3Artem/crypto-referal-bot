@@ -2,15 +2,10 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from backend.constants.enums import BlockchainEnum
-from backend.repositories.blockchain_repo import blockchain_repository
-from backend.repositories.user_repo import user_repository
-from backend.schemas.address import AddressCreate
 from backend.services.blockchain_service import BlockchainService
 from backend.services.user_service import UserService
 from bot.main.bot_instance import bot, dp
-from bot.main.keyboards.blockchain_survey import start_keyboard
 from bot.main.keyboards.command_button import command_keyboard
-from bot.main.states import BlockchainSurvey
 from core.settings import settings
 
 user_state = {}
@@ -21,61 +16,30 @@ async def select_blockchain(callback_query: types.CallbackQuery):
     user_state[callback_query.from_user.id] = {"blockchain": callback_query.data}
 
     await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
-    await BlockchainSurvey.address.set()
 
 
-async def handle_tron(address: str, blockchain: str, user_id: int):
-    address_exist = await blockchain_repository.address_exists_check(address=address)
-    if address_exist is not None:
-        await bot.send_message(
-            user_id,
-            "Этот адресс уже используется, пожалуйста введите другой",
-            reply_markup=start_keyboard,
-        )
-    else:
-        validation_address = await BlockchainService.validate_tron_address(address=address)
-        if validation_address["status"] == 404:
-            await bot.send_message(user_id, validation_address["result"], reply_markup=start_keyboard)
-
-        if validation_address["status"] == 200:
-            address = AddressCreate(
-                address=address,
-                owner_id=user_id,
-                blockchain=blockchain,
-            )
-            await BlockchainService.create_address(address)
-
-            await UserService.reward_on_connection(user_id=user_id)
-            if await user_repository.refferer_user_first_level(user_id=user_id) is not None:
-                await UserService.reward_first_level(user_id=user_id)
-            if await user_repository.refferer_user_second_level(user_id=user_id) is not None:
-                await UserService.reward_second_level(user_id=user_id)
-
-            await bot.send_message(
-                user_id,
-                "Отлично, адресс сохранен \n Вы получили ",  # {user_points}",
-                reply_markup=start_keyboard,
-            )
+async def handle_tron(address: str):
+    return await BlockchainService.validate_tron_address(address=address)
 
 
-async def handle_ethereum(address: str, blockchain: str, user_id: int):
-    pass
+async def handle_ethereum(address: str):
+    return await BlockchainService.validate_etereum_address(address=address)
 
 
-async def handle_base(address: str, blockchain: str, user_id: int):
-    pass
+async def handle_base(address: str):
+    return await BlockchainService.validate_base_address(address=address)
 
 
-async def handle_polygon(address: str, blockchain: str, user_id: int):
-    pass
+async def handle_polygon(address: str):
+    return await BlockchainService.validate_polygon_address(address=address)
 
 
-async def handle_solana(address: str, blockchain: str, user_id: int):
-    pass
+async def handle_solana(address: str):
+    return await BlockchainService.validate_solana_address(address=address)
 
 
-async def handle_bsc(address: str, blockchain: str, user_id: int):
-    pass
+async def handle_bsc(address: str):
+    return await BlockchainService.validate_bsc_address(address=address)
 
 
 HANDLERS = {
