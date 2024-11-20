@@ -27,6 +27,7 @@ class Addresses(models.Model):
     def __str__(self):
         return self.address
 
+
 class Airdrops(models.Model):
     id = models.AutoField(primary_key=True)
     points = models.FloatField(blank=False, default=0.0)
@@ -41,6 +42,7 @@ class Mailings(models.Model):
     id = models.AutoField(primary_key=True)
     message = models.CharField(max_length=3000, blank=False, default="None")
     users = models.ManyToManyField(Users, related_name="airdrops")
+    send = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Mailing"
