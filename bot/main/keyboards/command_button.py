@@ -1,6 +1,8 @@
-from aiogram.types import InlineKeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-button_account = InlineKeyboardButton("account", callback_data="account")
-button_help = InlineKeyboardButton("help", callback_data="help")
+from bot.main.constants.enums import StartMenuEnum
 
-command_keyboard = ReplyKeyboardMarkup().add(button_account, button_help)
+button_account = InlineKeyboardButton("account", callback_data=StartMenuEnum.ACCOUNT)
+button_help = InlineKeyboardButton("help", callback_data=StartMenuEnum.HELP)
+
+command_keyboard = InlineKeyboardMarkup().add(button_account, button_help)
