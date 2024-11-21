@@ -5,7 +5,7 @@ from backend.repositories.blockchain_repo import blockchain_repository
 from backend.schemas.address import AddressCreate, AddressUpdate
 from backend.services.user_service import UserService
 from bot_backend.settings import ETHERSCAN_HOST, ETHERSCAN_TOKEN, TRONSCAN_HOST
-
+import re
 
 class BlockchainService:
 
@@ -25,28 +25,38 @@ class BlockchainService:
 
     @staticmethod
     async def validate_etereum_address(address: str) -> dict:
+        if not re.fullmatch(r'[1-9A-HJ-NP-Za-km-z]{32,44}', address):
+            return False
         responce = requests.get(
             f"{ETHERSCAN_HOST}?chainid=1&module=account&action=tokentx&address={address}&apikey={ETHERSCAN_TOKEN}"
         )
         if responce.status_code == 200:
-            return {"status": 200}
+            return True
         elif responce.status_code == 0:
-            return {"status": 404, "result": f"Такого адресса не существует: {address}"}
+            return False
 
     @staticmethod
     async def validate_base_address(address: str) -> bool:
+        if not re.fullmatch(r'[1-9A-HJ-NP-Za-km-z]{32,44}', address):
+            return False
         return True
 
     @staticmethod
     async def validate_polygon_address(address: str) -> bool:
+        if not re.fullmatch(r'[1-9A-HJ-NP-Za-km-z]{32,44}', address):
+            return False
         return True
 
     @staticmethod
     async def validate_solana_address(address: str) -> bool:
+        if not re.fullmatch(r'[1-9A-HJ-NP-Za-km-z]{32,44}', address):
+            return False
         return True
 
     @staticmethod
     async def validate_tron_address(address: str) -> bool:
+        if not re.fullmatch(r'[0-9A-HJ-NP-Za-km-z]{32,44}', address):
+            return False
         responce = requests.get(f"{TRONSCAN_HOST}?address={address}&asset_type=0")
         responce_data = responce.json()
         if responce_data["data"][0] is None or float(responce_data["data"][0]["token_value"]) == 0:
@@ -56,4 +66,6 @@ class BlockchainService:
 
     @staticmethod
     async def validate_bsc_address(address: str) -> bool:
+        if not re.fullmatch(r'[1-9A-HJ-NP-Za-km-z]{32,44}', address):
+            return False
         return True

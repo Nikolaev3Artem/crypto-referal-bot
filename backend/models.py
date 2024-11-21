@@ -40,7 +40,7 @@ class Airdrops(models.Model):
 
 class Mailings(models.Model):
     id = models.AutoField(primary_key=True)
-    message = models.CharField(max_length=3000, blank=False, default="None")
+    message = models.TextField(max_length=3000, blank=False, default="None")
     users = models.ManyToManyField(Users, related_name="airdrops")
     send = models.BooleanField(default=False)
 
