@@ -5,21 +5,25 @@ from backend.constants.enums import BlockchainEnum
 from backend.services.user_service import UserService
 from bot.main.bot_instance import bot, dp
 from bot.main.keyboards.command_button import command_keyboard
-from core.settings import settings
 from bot.repositories.messages_repo import message_repository
+from core.settings import settings
 
 user_state = {}
 
 
 @dp.callback_query_handler(lambda c: c.data in [blockchain.value for blockchain in BlockchainEnum])
 async def select_blockchain(callback_query: types.CallbackQuery):
-    user_state[callback_query.from_user.id] = {"blockchain": callback_query.data}
+    user_id = callback_query["from"]["id"]
+    if user_id not in user_state:
+        user_state[user_id] = {}
+    user_state[user_id]["blockchain"] = callback_query.data
 
     await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
 
+
 @dp.callback_query_handler(lambda c: c.data == "FinishSurvey")
 async def handle_callback_button_end(callback_query: types.CallbackQuery, state: FSMContext):
-    user_id = callback_query['from']['id']
+    user_id = callback_query["from"]["id"]
     refferal_link = f"https://t.me/{settings.BOT_NICKNAME}?start={user_id}"
     await UserService.update_refferral_link_link(
         user_id=callback_query["from"]["id"],

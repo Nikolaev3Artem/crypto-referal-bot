@@ -6,6 +6,7 @@ from backend.models import Addresses, Users
 from backend.schemas.user import UserCreate
 from utils.base_repository import BaseRepository
 
+
 class UserRepository(BaseRepository):
 
     @sync_to_async
@@ -70,6 +71,10 @@ class UserRepository(BaseRepository):
         user.save()
         return user.points
 
+    @sync_to_async
+    def user_exists_check(self, user_id: int) -> Users:
+        user = self.model.objects.filter(user_id=user_id).first()
+        return user
 
     @sync_to_async
     def get_user_refferals(self, user_id: int) -> list[Users]:

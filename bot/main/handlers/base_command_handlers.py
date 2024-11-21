@@ -1,36 +1,29 @@
 from aiogram import types
 
-from backend.repositories.user_repo import user_repository
-from backend.schemas.user import UserCreate
 from backend.services.user_service import UserService
 from bot.main.bot_instance import bot, dp
 from bot.main.constants.enums import StartMenuEnum
+from bot.main.handlers.blockchain_handler import user_state
 from bot.main.keyboards.blockchain_survey import start_keyboard
 from bot.repositories.messages_repo import message_repository
 
+
 @dp.message_handler(commands=["start"])
 async def send_welcome(message: types.Message):
-    try:
-        await user_repository.get_user(message["from"]["id"])
-    except Exception:
-        if len(message.text) < 7 or str(message["from"]["id"]) == message.text[7:]:
-            user = message["from"]
-            user = UserCreate(
-                user_id=user["id"],
-                username=user["username"] if "username" in user else None,
-                language=user["language_code"] if "language_code" in user else None,
-            )
-            await user_repository.create_user(user)
-        else:
-            invited_by = message.text[7:]
-            user = message["from"]
-            user = UserCreate(
-                user_id=user["id"],
-                username=user["username"] if "username" in user else None,
-                language=user["language_code"] if "language_code" in user else None,
-            )
-            await user_repository.create_user(user)
-            await user_repository.update_invited_by(message["from"]["id"], invited_by=invited_by)
+    user_id = message.from_user.id
+    inviter_id = None
+
+    if len(message.text.split()) > 1:
+        try:
+            inviter_id = int(message.text.split()[1])
+        except ValueError:
+            inviter_id = None
+
+    if inviter_id:
+        if user_id not in user_state:
+            user_state[user_id] = {}
+        user_state[user_id]["invited_by"] = inviter_id
+
     start_message = await message_repository.get_start_message()
     await message.answer(start_message.message, reply_markup=start_keyboard)
 
@@ -48,15 +41,11 @@ async def send_acc_info(callback_query: types.CallbackQuery):
     formatted_message = account_message.message.format(**context)
 
     await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(
-        callback_query.from_user.id,
-        formatted_message)
+    await bot.send_message(callback_query.from_user.id, formatted_message)
 
 
 @dp.callback_query_handler(lambda c: c.data == StartMenuEnum.HELP)
 async def send_help(callback_query: types.CallbackQuery):
     help_message = await message_repository.get_help_message()
     await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(
-        callback_query.from_user.id, help_message.message
-    )
+    await bot.send_message(callback_query.from_user.id, help_message.message)
