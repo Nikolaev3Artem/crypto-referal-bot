@@ -19,15 +19,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split()
 
+ETHERSCAN_TOKEN = os.getenv("ETHERSCAN_TOKEN")
+ETHERSCAN_HOST = os.getenv("ETHERSCAN_HOST")
+TRONSCAN_HOST = os.getenv("TRONSCAN_HOST")
 
 # Application definition
-APPS = [
-    "backend",
-]
+APPS = ["backend", "bot"]
 
-THIRD_PARTY_APPS = [
-    "rest_framework",
-]
 
 BASIC = [
     "django.contrib.admin",
@@ -38,7 +36,7 @@ BASIC = [
     "django.contrib.staticfiles",
 ]
 
-INSTALLED_APPS = BASIC + THIRD_PARTY_APPS + APPS
+INSTALLED_APPS = BASIC + APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

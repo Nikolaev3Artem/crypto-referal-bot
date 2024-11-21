@@ -1,6 +1,5 @@
 version: "3.8"
 
-
 services:
   postgres:
     image: postgres:13.3-alpine
@@ -25,21 +24,25 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/project
-    command: bash entrypoint.sh
+      - .:/backend
+      - .:/bot/bot_backend
+      - .:/bot
+    command: bash entrypoint_back.sh
 
   telegram_bot:
     restart: always
-    build: 
+    build:
       context: .
-      dockerfile: ./bot/Dockerfile
-    command: 
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/backend
+      - .:/bot/bot_backend
+      - .:/bot
+    command:
       - /bin/sh
-      - '-c'
-      - './bot/entrypoint.sh'
-
-    env_file:
-      .env
+      - "-c"
+      - "./entrypoint_bot.sh"
+    env_file: .env
 
 volumes:
   pg_data:
