@@ -2,10 +2,10 @@ from aiogram import types
 
 from backend.repositories.user_repo import user_repository
 from backend.schemas.user import UserCreate
+from backend.services.user_service import UserService
 from bot.main.bot_instance import bot, dp
 from bot.main.constants.enums import StartMenuEnum
 from bot.main.keyboards.blockchain_survey import start_keyboard
-
 
 @dp.message_handler(commands=["start"])
 async def send_welcome(message: types.Message):
@@ -42,21 +42,21 @@ async def send_welcome(message: types.Message):
 
 @dp.callback_query_handler(lambda c: c.data == StartMenuEnum.ACCOUNT)
 async def send_acc_info(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    refferal_link = await UserService.get_refferal_link(user_id=user_id)
+    refferals_count = await UserService.get_user_refferals_count(user_id=user_id)
+    user_points = await UserService.get_user_points(user_id=user_id)
+
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
-        """
-Твои адреса:
-1. ETH/BASE/POLY:
-2. Solana
-3. BSC
-4. Tron
+        f"""
 
-Твоя рефка (ссылка)
+Твоя реферальная ссылка {refferal_link}
 
-Рефералов: n
+Рефералов: {refferals_count}
 
-Баллов: n Olegopoints
+Баллов: {user_points} Olegopoints
         """,
     )
 

@@ -34,3 +34,20 @@ class UserService:
         points = await PointCoefficientService.get_second_level_referral_points()
         user = await user_repository.refferer_user_second_level(user_id=user_id)
         await user_repository.reward_second_level(user_id=user, points=points)
+
+    @staticmethod
+    async def get_refferal_link(user_id: int) -> str:
+        user = await UserService.get_user(id=user_id)
+        return user.referral_link
+    
+    @staticmethod
+    async def get_user_refferals_count(user_id: int) -> int:
+        return await user_repository.get_user_refferals(user_id=user_id)
+    
+    @staticmethod
+    async def get_user_points(user_id: int) -> float:
+        return await user_repository.get_user_points(user_id=user_id)
+    
+    @staticmethod
+    async def get_user_addresses(user_id: int) -> float:
+        return await user_repository.get_user_addresses(user_id=user_id)
