@@ -18,10 +18,16 @@ class PointCoefficientsAdmin(admin.ModelAdmin): ...
 
 
 class MailingsForm(forms.ModelForm):
-    blockchain = forms.ChoiceField(
-        choices=[(choice.value, choice.label) for choice in BlockchainEnum],  # Отображаем label для корректности
-        required=True,
-        label="Блокчейн",
+    blockchains = forms.MultipleChoiceField(
+        choices=[(choice.value, choice.label) for choice in BlockchainEnum],
+        required=False,
+        label="Блокчейны",
+        widget=forms.CheckboxSelectMultiple,  # Используем чекбоксы для выбора нескольких блокчейнов
+    )
+    all_users = forms.BooleanField(
+        required=False,
+        label="Выбрать всех пользователей",
+        help_text="Если выбрано, то рассылка будет отправлена всем пользователям.",
     )
 
     class Meta:
@@ -37,21 +43,26 @@ class MailingsAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         """
         Переопределяем метод сохранения модели.
-        Если указан блокчейн, автоматически выбираем пользователей.
+        Если указаны блокчейны или выбран флаг "всем", выбираем соответствующих пользователей.
         """
-        blockchain = form.cleaned_data.get("blockchain")
+        blockchains = form.cleaned_data.get("blockchains")
+        all_users = form.cleaned_data.get("all_users")
 
-        # Сначала сохраняем объект, чтобы он получил ID
+        # Сохраняем объект, чтобы он получил ID
         super().save_model(request, obj, form, change)
 
-        if blockchain:
-            # Фильтруем пользователей с адресами, связанными с указанным блокчейном
-            users = Users.objects.filter(
-                user__blockchain=blockchain  # `user` связано через ForeignKey в Addresses
-            ).distinct()
+        if all_users:
+            # Если выбрано "всем", выбираем всех пользователей
+            users = Users.objects.all()
+        elif blockchains:
+            # Если выбраны блокчейны, фильтруем пользователей по ним
+            users = Users.objects.filter(user__blockchain__in=blockchains).distinct()
+        else:
+            # Если ни блокчейны, ни "всем" не выбраны, оставляем поле пустым
+            users = Users.objects.none()
 
-            # Устанавливаем пользователей после сохранения объекта
-            obj.users.set(users)
+        # Устанавливаем пользователей после сохранения объекта
+        obj.users.set(users)
 
         if obj.send:
             self.initiate_mailing(request, obj)
