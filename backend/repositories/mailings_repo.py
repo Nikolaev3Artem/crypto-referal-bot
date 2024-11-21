@@ -1,4 +1,3 @@
-# mailing_repo.py
 from asgiref.sync import sync_to_async
 
 from backend.models import Mailings
