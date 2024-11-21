@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import admin
 
 from backend.constants.enums import BlockchainEnum
-from backend.models import Addresses, Mailings, PointCoefficients, Users
+from backend.models import Addresses, Airdrops, Mailings, PointCoefficients, Users
 from backend.services.mailing_service import MailingService
 
 
@@ -114,7 +114,70 @@ class MailingsAdmin(admin.ModelAdmin):
             self.message_user(request, f"Ошибка при отправке рассылки: {e}", level="error")
 
 
+class AirdropsForm(forms.ModelForm):
+    user_ids_file = forms.FileField(
+        required=True,
+        label="CSV-файл с user_id",
+        help_text="Загрузите CSV-файл, содержащий user_id (один ID на строку).",
+    )
+
+    class Meta:
+        model = Airdrops
+        fields = ["points"]  # Поля модели, которые доступны для редактирования
+
+
+class AirdropsAdmin(admin.ModelAdmin):
+    list_display = ("id", "points")
+    form = AirdropsForm
+
+    def save_model(self, request, obj, form, change):
+        """
+        Переопределяем метод сохранения модели.
+        Используем CSV-файл для выдачи поинтов указанным пользователям.
+        """
+        user_ids_file = form.cleaned_data.get("user_ids_file")
+        points = form.cleaned_data.get("points")
+
+        # Сохраняем объект, чтобы он получил ID
+        super().save_model(request, obj, form, change)
+
+        if user_ids_file:
+            # Получаем пользователей из CSV-файла
+            users = self.get_users_from_csv(user_ids_file)
+
+            # Добавляем пользователей к airdrop и начисляем им поинты
+            for user in users:
+                user.points += points
+                user.save()
+
+            # Связываем пользователей с текущим airdrop
+            obj.users.set(users)
+
+    def get_users_from_csv(self, file):
+        """
+        Читает CSV-файл и возвращает QuerySet пользователей с указанными user_id.
+        """
+        try:
+            user_ids = []
+            # Открываем файл с правильной кодировкой
+            file = TextIOWrapper(file.file, encoding="utf-8")
+            reader = csv.reader(file)
+            for row in reader:
+                if row:  # Пропускаем пустые строки
+                    try:
+                        user_ids.append(int(row[0]))
+                    except ValueError:
+                        continue  # Пропускаем строки с некорректными ID
+
+            # Возвращаем QuerySet пользователей с указанными user_id
+            return Users.objects.filter(user_id__in=user_ids).distinct()
+        except Exception as e:
+            print(f"Ошибка при обработке CSV-файла: {e}")
+            return Users.objects.none()
+
+
 admin.site.register(Users, UsersAdmin)
 admin.site.register(Addresses, AddressAdmin)
 admin.site.register(PointCoefficients, PointCoefficientsAdmin)
 admin.site.register(Mailings, MailingsAdmin)
+admin.site.register(Airdrops, AirdropsAdmin)
