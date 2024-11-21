@@ -10,6 +10,8 @@ from backend.services.user_service import UserService
 from bot.main.bot_instance import bot, dp
 from bot.main.handlers.blockchain_handler import user_state
 from bot.main.keyboards.blockchain_survey import start_keyboard, user_confirmation_keyboard
+from bot.main.keyboards.command_button import command_keyboard
+from bot.repositories.messages_repo import message_repository
 from core.settings import settings
 
 HANDLERS = {
@@ -70,6 +72,17 @@ async def confirm_address(callback_query: types.CallbackQuery):
             await UserService.update_refferral_link_link(
                 user_id=callback_query["from"]["id"],
                 refferral_link=refferal_link,
+            )
+            survey_completed = await message_repository.get_survey_completed_message()
+            context = {
+                "refferal_link": refferal_link,
+            }
+            formatted_message = survey_completed.message.format(**context)
+
+            await bot.send_message(
+                callback_query.from_user.id,
+                formatted_message,
+                reply_markup=command_keyboard,
             )
 
         address_create = AddressCreate(
