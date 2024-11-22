@@ -19,7 +19,6 @@ class MailingService:
 
             # Создаём задачи для отправки сообщений
             tasks = [self.send_message(user_id, mailing.message) for user_id in user_ids]
-
             # Выполняем задачи параллельно с ограничением
             if tasks:
                 await asyncio.gather(*tasks)

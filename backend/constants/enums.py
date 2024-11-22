@@ -2,9 +2,6 @@ from django.db import models
 
 
 class BlockchainEnum(models.TextChoices):
-    ETHEREUM = "Ethereum"
-    BASE = "Base"
-    POLYGON = "Polygon"
+    ETHEREUM = "Eth/Base/BSC/Pol"
     SOLANA = "Solana"
     TRON = "Tron"
-    BSC = "BSC"

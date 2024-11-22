@@ -12,10 +12,7 @@ from bot.main.keyboards.blockchain_survey import start_keyboard, user_confirmati
 
 HANDLERS = {
     BlockchainEnum.ETHEREUM: BlockchainService.validate_etereum_address,
-    BlockchainEnum.BASE: BlockchainService.validate_base_address,
-    BlockchainEnum.POLYGON: BlockchainService.validate_polygon_address,
     BlockchainEnum.SOLANA: BlockchainService.validate_solana_address,
-    BlockchainEnum.BSC: BlockchainService.validate_bsc_address,
     BlockchainEnum.TRON: BlockchainService.validate_tron_address,
 }
 
