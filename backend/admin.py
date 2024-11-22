@@ -4,6 +4,8 @@ from io import TextIOWrapper
 from asgiref.sync import async_to_sync
 from django import forms
 from django.contrib import admin
+from django.db.models import Count
+from django.http import HttpResponse
 
 from backend.constants.enums import BlockchainEnum
 from backend.models import Addresses, Airdrops, Mailings, PointCoefficients, Users
@@ -49,7 +51,64 @@ def parse_user_ids_from_csv(file):
     return Users.objects.filter(user_id__in=user_ids).distinct()
 
 
-class UsersAdmin(admin.ModelAdmin): ...
+@admin.action(description="Экспортировать выбранных пользователей в CSV")
+def export_users_to_csv(modeladmin, request, queryset):
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="users.csv"'
+    writer = csv.writer(response, delimiter=";", quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+    writer.writerow(
+        [
+            "User ID",
+            "Username",
+            "Referral Link",
+            "Points",
+            "Language",
+            "Bio",
+            "Invited By",
+            "Referrals Count",  # Новое поле
+        ]
+    )
+
+    queryset = queryset.annotate(referrals_count=Count("referrals"))
+
+    for user in queryset:
+        invited_by = user.invited_by.user_id if user.invited_by else "None"
+        writer.writerow(
+            [
+                user.user_id,
+                user.username,
+                user.referral_link,
+                user.points,
+                user.language if user.language else "",
+                user.bio if user.bio else "",
+                invited_by,
+                user.referrals_count,
+            ]
+        )
+
+    return response
+
+
+class UsersAdmin(admin.ModelAdmin):
+    list_display = (
+        "user_id",
+        "username",
+        "referral_link",
+        "points",
+        "language",
+        "bio",
+        "invited_by",
+        "referrals_count_display",
+    )
+    search_fields = ("username", "user_id")
+    list_filter = ("language",)
+    actions = [export_users_to_csv]
+
+    def referrals_count_display(self, obj):
+        return obj.referrals.count()
+
+    referrals_count_display.short_description = "Referrals Count"
 
 
 class AddressAdmin(admin.ModelAdmin): ...
