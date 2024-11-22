@@ -83,5 +83,9 @@ class UserRepository(BaseRepository):
     def get_user_addresses(self, user_id: int) -> float:
         return Addresses.objects.filter(owner_id=user_id)
 
+    @sync_to_async
+    def check_user_addresses_exists(self, user: Users):
+        addresses = user.addresses.all()
+        return addresses
 
 user_repository = UserRepository(model=Users)

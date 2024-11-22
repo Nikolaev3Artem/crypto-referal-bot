@@ -20,7 +20,7 @@ class Users(models.Model):
 class Addresses(models.Model):
     id = models.AutoField(primary_key=True)
     address = models.CharField(max_length=300, blank=False, unique=True)
-    owner_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="user")
+    owner_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="addresses")
     balance = models.FloatField(blank=False, default=0.0)
     blockchain = models.CharField(choices=BlockchainEnum.choices, blank=False)
 
