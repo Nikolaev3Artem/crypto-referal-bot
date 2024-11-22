@@ -1,0 +1,14 @@
+[flake8]
+max-line-length = 120
+per-file-ignores = 
+    startbot.py:W291
+    admin.py:E701
+
+exclude = 
+    .git,
+    __pycache__,
+    build,
+    dist,
+    migrations,
+    env,
+    venv
