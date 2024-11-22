@@ -24,7 +24,7 @@ async def confirm_address(callback_query: types.CallbackQuery):
         blockchain = user_state[user_id]["blockchain"]
         address = user_state[user_id]["address"]
         address_exist = await blockchain_repository.address_exists_check(address=address)
-        address_already_exists_message = await message_repository.get_ddress_already_exists_message()
+        address_already_exists_message = await message_repository.get_address_already_exists_message()
         address_not_correct_message = await message_repository.get_address_not_correct_message()
         address_created_message = await message_repository.get_address_created_message()
 
