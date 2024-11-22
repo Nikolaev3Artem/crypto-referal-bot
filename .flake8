@@ -2,7 +2,8 @@
 max-line-length = 120
 per-file-ignores = 
     startbot.py:W291
-    admin.py:E701
+    admin.py:E701,E501
+    admin.py:E501
 
 exclude = 
     .git,
