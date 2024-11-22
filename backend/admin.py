@@ -225,12 +225,6 @@ class AirdropsForm(forms.ModelForm):
 
     def clean_message(self):
         message = self.cleaned_data.get("message")
-        required_placeholders = ["refferal_link", "referrals_count", "user_points"]
-        missing_placeholders = [ph for ph in required_placeholders if f"{{{ph}}}" not in message]
-        if missing_placeholders:
-            raise forms.ValidationError(
-                f"Сообщение должно содержать следующие плейсхолдеры: {', '.join(missing_placeholders)}."
-            )
         return message
 
 
