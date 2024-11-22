@@ -24,16 +24,15 @@ async def handle_callback_button_end(callback_query: types.CallbackQuery, state:
     addresses = await UserService.check_user_addresses_exists(user_id=user_id)
     refferal_link = f"https://t.me/{settings.BOT_NICKNAME}?start={user_id}"
     survey_completed = await message_repository.get_survey_completed_message()
+    no_addresses_message = await message_repository.get_no_addresses_message()
 
     if not addresses:
         await bot.send_message(
             callback_query.from_user.id,
-            "Вы должны ввести хотя бы один адрес",
+            no_addresses_message.message,
             reply_markup=start_keyboard,
         )
         return
-    
-
 
     await UserService.update_refferral_link_link(
         user_id=callback_query["from"]["id"],
