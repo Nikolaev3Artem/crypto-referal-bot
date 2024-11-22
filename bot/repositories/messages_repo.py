@@ -43,4 +43,8 @@ class MessageRepository(BaseRepository):
     def get_address_confirm_creating_message(self) -> BotMessages:
         return BotMessages.objects.get(title="address_confirm_creating_message")
     
+    @sync_to_async
+    def get_input_address_message(self) -> BotMessages:
+        return BotMessages.objects.get(title="input_address_message")
+    
 message_repository = MessageRepository(BotMessages)

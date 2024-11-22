@@ -32,7 +32,7 @@ async def confirm_address(callback_query: types.CallbackQuery):
         if address_exist is not None:
             await bot.send_message(
                 user_id,
-                address_already_exists_message,
+                address_already_exists_message.message,
                 reply_markup=start_keyboard,
             )
         else:
@@ -40,7 +40,7 @@ async def confirm_address(callback_query: types.CallbackQuery):
             validation_address = await handler(address)
 
         if not validation_address:
-            await bot.send_message(user_id, address_not_correct_message, reply_markup=start_keyboard)
+            await bot.send_message(user_id, address_not_correct_message.message, reply_markup=start_keyboard)
         else:
             address = AddressCreate(
                 address=address,
@@ -58,7 +58,7 @@ async def confirm_address(callback_query: types.CallbackQuery):
 
             await bot.send_message(
                 user_id,
-                address_created_message,
+                address_created_message.message,
                 reply_markup=start_keyboard,
             )
 
