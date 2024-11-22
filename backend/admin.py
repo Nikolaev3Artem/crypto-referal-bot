@@ -111,7 +111,34 @@ class UsersAdmin(admin.ModelAdmin):
     referrals_count_display.short_description = "Referrals Count"
 
 
-class AddressAdmin(admin.ModelAdmin): ...
+class AddressesAdmin(admin.ModelAdmin):
+    list_display = ("id", "address", "owner_id", "balance", "blockchain")
+    actions = ["export_addresses_to_csv"]
+
+    def export_addresses_to_csv(self, request, queryset):
+        """
+        Export selected addresses to a CSV file with a semicolon separator.
+        """
+        field_names = ["id", "address", "owner_id", "balance", "blockchain"]
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="addresses.csv"'
+
+        writer = csv.writer(response, delimiter=";")
+        writer.writerow(field_names)
+        for address in queryset:
+            writer.writerow(
+                [
+                    address.id,
+                    address.address,
+                    address.owner_id.user_id,
+                    address.balance,
+                    address.blockchain,
+                ]
+            )
+        return response
+
+    export_addresses_to_csv.short_description = "Export selected addresses to CSV"
 
 
 class PointCoefficientsAdmin(admin.ModelAdmin): ...
@@ -290,7 +317,7 @@ class AirdropsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Users, UsersAdmin)
-admin.site.register(Addresses, AddressAdmin)
+admin.site.register(Addresses, AddressesAdmin)
 admin.site.register(PointCoefficients, PointCoefficientsAdmin)
 admin.site.register(Mailings, MailingsAdmin)
 admin.site.register(Airdrops, AirdropsAdmin)
