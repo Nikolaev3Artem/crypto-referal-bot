@@ -51,3 +51,11 @@ class UserService:
     @staticmethod
     async def get_user_addresses(user_id: int) -> float:
         return await user_repository.get_user_addresses(user_id=user_id)
+    
+    @staticmethod
+    async def check_user_addresses_exists(user_id: int):
+        user = await UserService.get_user(id=user_id)
+        addresses = user_repository.check_user_addresses_exists(user=user)
+        if not addresses:
+            return False
+        return True

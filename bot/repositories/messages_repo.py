@@ -23,4 +23,28 @@ class MessageRepository(BaseRepository):
     def get_survey_completed_message(self) -> BotMessages:
         return BotMessages.objects.get(title="survey_completed_message")
     
+    @sync_to_async
+    def get_no_addresses_message(self) -> BotMessages:
+        return BotMessages.objects.get(title="no_addresses_message")
+    
+    @sync_to_async
+    def get_address_already_exists_message(self) -> BotMessages:
+        return BotMessages.objects.get(title="address_already_exists_message")
+    
+    @sync_to_async
+    def get_address_not_correct_message(self) -> BotMessages:
+        return BotMessages.objects.get(title="address_not_correct_message")
+    
+    @sync_to_async
+    def get_address_created_message(self) -> BotMessages:
+        return BotMessages.objects.get(title="address_created_message")
+    
+    @sync_to_async
+    def get_address_confirm_creating_message(self) -> BotMessages:
+        return BotMessages.objects.get(title="address_confirm_creating_message")
+    
+    @sync_to_async
+    def get_input_address_message(self) -> BotMessages:
+        return BotMessages.objects.get(title="input_address_message")
+    
 message_repository = MessageRepository(BotMessages)

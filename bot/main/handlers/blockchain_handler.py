@@ -14,8 +14,14 @@ user_state = {}
 @dp.callback_query_handler(lambda c: c.data in [blockchain.value for blockchain in BlockchainEnum])
 async def select_blockchain(callback_query: types.CallbackQuery):
     user_state[callback_query.from_user.id] = {"blockchain": callback_query.data}
+    address_confirm_creating_message = await message_repository.get_input_address_message()
+    
+    context = {
+        "address": callback_query.data,
+    }
+    formatted_message = address_confirm_creating_message.message.format(**context)
 
-    await bot.send_message(callback_query.from_user.id, f"Введите ваш адрес для сети {callback_query.data}")
+    await bot.send_message(callback_query.from_user.id, formatted_message)
 
 @dp.callback_query_handler(lambda c: c.data == "FinishSurvey")
 async def handle_callback_button_end(callback_query: types.CallbackQuery, state: FSMContext):
