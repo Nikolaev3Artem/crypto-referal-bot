@@ -5,7 +5,6 @@ from utils.base_repository import BaseRepository
 
 
 class MailingRepository(BaseRepository):
-    # Определяем модель на уровне класса
     model = Mailings
 
     @sync_to_async
@@ -23,6 +22,12 @@ class MailingRepository(BaseRepository):
         """
         return list(mailing.users.values_list("user_id", flat=True))
 
+    @sync_to_async
+    def get_users(self, mailing: Mailings):
+        """
+        Возвращает список юзеров связаных с рассылкой
+        """
+        return list(mailing.users.all())
 
-# Создаем экземпляр MailingRepository для импорта в других модулях
+
 mailing_repository = MailingRepository(Mailings)

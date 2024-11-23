@@ -10,7 +10,6 @@ from django.http import HttpResponse
 from backend.constants.enums import BlockchainEnum
 from backend.models import Addresses, Airdrops, Mailings, PointCoefficients, Users
 from backend.services.mailing_service import MailingService
-from backend.services.user_service import UserService
 
 
 def parse_user_ids_from_csv(file):
@@ -19,10 +18,16 @@ def parse_user_ids_from_csv(file):
         file = TextIOWrapper(file.file, encoding="utf-8")
         sample = file.read(1024)
         file.seek(0)
-
+        possible_delimiters = [",", ";", "\t", "|", " ", ":"]
         # Определяем разделитель
         sniffer = csv.Sniffer()
-        dialect = sniffer.sniff(sample, delimiters=";,")
+        try:
+            dialect = sniffer.sniff(sample, delimiters="".join(possible_delimiters))
+        except csv.Error:
+            # If sniffer fails, default to comma
+            dialect = csv.get_dialect("excel")
+            print("Delimiter not recognized. Defaulting to comma delimiter.")
+
         has_header = sniffer.has_header(sample)
 
         reader = csv.reader(file, dialect)
@@ -141,7 +146,8 @@ class AddressesAdmin(admin.ModelAdmin):
     export_addresses_to_csv.short_description = "Export selected addresses to CSV"
 
 
-class PointCoefficientsAdmin(admin.ModelAdmin): ...
+class PointCoefficientsAdmin(admin.ModelAdmin):
+    pass
 
 
 class MailingsForm(forms.ModelForm):
@@ -195,7 +201,7 @@ class MailingsAdmin(admin.ModelAdmin):
         elif user_ids_file:
             users = parse_user_ids_from_csv(user_ids_file)
         elif blockchains:
-            users = Users.objects.filter(user__blockchain__in=blockchains).distinct()
+            users = Users.objects.filter(addresses__blockchain__in=blockchains).distinct()
         else:
             users = Users.objects.none()
 
@@ -204,39 +210,27 @@ class MailingsAdmin(admin.ModelAdmin):
         if obj.send:
             try:
                 mailing_service = MailingService()
-                for user in users:
-                    refferal_link = async_to_sync(UserService.get_refferal_link)(user_id=user.user_id)
-                    referrals_count = async_to_sync(UserService.get_user_refferals_count)(user_id=user.user_id)
-                    user_points = async_to_sync(UserService.get_user_points)(user_id=user.user_id)
-
-                    context = {
-                        "refferal_link": refferal_link,
-                        "referrals_count": referrals_count,
-                        "user_points": user_points,
-                        "username": user.username,
-                    }
-
-                    try:
-                        formatted_message = message_template.format(**context)
-                    except KeyError as ke:
-                        formatted_message = f"Ошибка форматирования сообщения: отсутствует ключ {ke}"
-                        print(formatted_message)
-
-                    mailing = Mailings(message=formatted_message, send=True)
-                    mailing.save()
-                    mailing.users.set([user])
-
-                    async_to_sync(mailing_service.send_mailing)(mailing)
-
-                self.message_user(request, "Рассылка успешно отправлена.")
+                async_to_sync(mailing_service.send_mailing)(obj)
+                self.message_user(request, "Mailing successfully sent.")
             except Exception as e:
                 print(f"Ошибка при отправке рассылки: {e}")
                 self.message_user(request, f"Ошибка при отправке рассылки: {e}", level="error")
 
 
 class AirdropsForm(forms.ModelForm):
+    blockchains = forms.MultipleChoiceField(
+        choices=[(choice.value, choice.label) for choice in BlockchainEnum],
+        required=False,
+        label="Blockchains",
+        widget=forms.CheckboxSelectMultiple,
+    )
+    all_users = forms.BooleanField(
+        required=False,
+        label="Select all users",
+        help_text="If selected, the airdrop will be sent to all users.",
+    )
     user_ids_file = forms.FileField(
-        required=True,
+        required=False,
         label="CSV-файл с user_id",
         help_text="Загрузите CSV-файл, содержащий user_id (один ID на строку).",
     )
@@ -250,10 +244,6 @@ class AirdropsForm(forms.ModelForm):
         model = Airdrops
         fields = ["points", "message"]
 
-    def clean_message(self):
-        message = self.cleaned_data.get("message")
-        return message
-
 
 class AirdropsAdmin(admin.ModelAdmin):
     list_display = ("id", "points")
@@ -266,47 +256,36 @@ class AirdropsAdmin(admin.ModelAdmin):
         Также отправляем уведомление о получении аирдропа.
         """
         user_ids_file = form.cleaned_data.get("user_ids_file")
+        blockchains = form.cleaned_data.get("blockchains")
+        all_users = form.cleaned_data.get("all_users")
         points = form.cleaned_data.get("points")
         message_template = form.cleaned_data.get("message")
 
         super().save_model(request, obj, form, change)
 
         users = Users.objects.none()
-        if user_ids_file:
+        if all_users:
+            users = Users.objects.all()
+        elif user_ids_file:
             users = parse_user_ids_from_csv(user_ids_file)
+        elif blockchains:
+            users = Users.objects.filter(addresses__blockchain__in=blockchains).distinct()
 
+        obj.users.set(users)
+
+        if users.exists():
             for user in users:
                 user.points += points
                 user.save()
 
-            obj.users.set(users)
-
-        if users.exists():
             try:
+                # Create a Mailing object to send notifications
+                mailing = Mailings(message=message_template, send=True)
+                mailing.save()
+                mailing.users.set(users)
+
                 mailing_service = MailingService()
-                for user in users:
-                    refferal_link = async_to_sync(UserService.get_refferal_link)(user_id=user.user_id)
-                    referrals_count = async_to_sync(UserService.get_user_refferals_count)(user_id=user.user_id)
-                    user_points = async_to_sync(UserService.get_user_points)(user_id=user.user_id)
-
-                    context = {
-                        "refferal_link": refferal_link,
-                        "referrals_count": referrals_count,
-                        "user_points": user_points,
-                        "username": user.username,
-                    }
-
-                    try:
-                        formatted_message = message_template.format(**context)
-                    except KeyError as ke:
-                        formatted_message = f"Ошибка форматирования сообщения: отсутствует ключ {ke}"
-                        print(formatted_message)
-
-                    mailing = Mailings(message=formatted_message, send=True)
-                    mailing.save()
-                    mailing.users.set([user])
-
-                    async_to_sync(mailing_service.send_mailing)(mailing)
+                async_to_sync(mailing_service.send_mailing)(mailing)
 
                 self.message_user(request, "Аирдроп успешно отправлен и уведомления разосланы.")
             except Exception as e:
