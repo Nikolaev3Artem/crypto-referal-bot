@@ -31,7 +31,8 @@ class Addresses(models.Model):
 class Airdrops(models.Model):
     id = models.AutoField(primary_key=True)
     points = models.FloatField(blank=False, default=0.0)
-    users = models.ManyToManyField(Users, related_name="airdrop")
+    message = models.TextField(max_length=3000, blank=False, default="None")
+    users = models.ManyToManyField(Users, related_name="airdrops")
 
     class Meta:
         verbose_name = "Airdrop"
@@ -41,7 +42,7 @@ class Airdrops(models.Model):
 class Mailings(models.Model):
     id = models.AutoField(primary_key=True)
     message = models.TextField(max_length=3000, blank=False, default="None")
-    users = models.ManyToManyField(Users, related_name="airdrops")
+    users = models.ManyToManyField(Users, related_name="mailings")
     send = models.BooleanField(default=False)
 
     class Meta:
