@@ -15,7 +15,7 @@ from backend.services.mailing_service import MailingService
 def parse_user_ids_from_csv(file):
     user_ids = []
     try:
-        file = TextIOWrapper(file.file, encoding="utf-8")
+        file = TextIOWrapper(file.file, encoding="utf-8-sig")
         sample = file.read(1024)
         file.seek(0)
         possible_delimiters = [",", ";", "\t", "|", " ", ":"]
