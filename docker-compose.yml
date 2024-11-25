@@ -24,9 +24,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/backend
-      - .:/bot/bot_backend
-      - .:/bot
+      - .:/project
     command: bash entrypoint_back.sh
 
   telegram_bot:
@@ -37,11 +35,8 @@ services:
     volumes:
       - .:/backend
       - .:/bot/bot_backend
-      - .:/bot
-    command:
-      - /bin/sh
-      - "-c"
-      - "./entrypoint_bot.sh"
+      - .:/bott
+    command: bash entrypoint_bot.sh
     env_file: .env
 
 volumes:

@@ -1,6 +1,3 @@
-# import os
-# import sys
-
 from aiogram import executor
 from django.core.management.base import BaseCommand
 
@@ -13,9 +10,6 @@ from bot.main.handlers.confirmation_address_handler import confirm_address, proc
 class Command(BaseCommand):
     help = "Launching the bot using the command"
 
-    # def restart_bot(self):
-    #     os.execv(sys.executable, ["python"] + sys.argv)
-
     def handle(self, *args, **options):
 
         dp.register_message_handler(process_confirm_address)
@@ -27,5 +21,9 @@ class Command(BaseCommand):
             handle_callback_button_end,
         )
 
-        executor.start_polling(dp, skip_updates=True)
-        # self.restart_bot()
+        while True:
+            try:
+                print("Запуск бота...")
+                executor.start_polling(dp, skip_updates=True)
+            except Exception as e:
+                self.stderr.write(f"Произошла ошибка: {e}")
