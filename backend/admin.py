@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from backend.constants.enums import BlockchainEnum
 from backend.models import Addresses, Airdrops, Mailings, PointCoefficients, Users
 from backend.services.mailing_service import MailingService
+from bot.main.bot_instance import logger
 
 
 def parse_user_ids_from_csv(file):
@@ -26,7 +27,9 @@ def parse_user_ids_from_csv(file):
         except csv.Error:
             # If sniffer fails, default to comma
             dialect = csv.get_dialect("excel")
-            print("Delimiter not recognized. Defaulting to comma delimiter.")
+            logger.info(
+                "Разделитель между строками csv файла не распознан. По умолчанию используется разделитель-запятая."
+            )
 
         has_header = sniffer.has_header(sample)
 
@@ -51,7 +54,7 @@ def parse_user_ids_from_csv(file):
                         except ValueError:
                             continue
     except Exception as e:
-        print(f"Ошибка при обработке CSV-файла: {e}")
+        logger.error("Ошибка при обработке CSV-файла: %s", e)
 
     return Users.objects.filter(user_id__in=user_ids).distinct()
 
@@ -213,7 +216,7 @@ class MailingsAdmin(admin.ModelAdmin):
                 async_to_sync(mailing_service.send_mailing)(obj)
                 self.message_user(request, "Mailing successfully sent.")
             except Exception as e:
-                print(f"Ошибка при отправке рассылки: {e}")
+                logger.error("Ошибка при отправке рассылки: %s", e)
                 self.message_user(request, f"Ошибка при отправке рассылки: {e}", level="error")
 
 
@@ -289,7 +292,7 @@ class AirdropsAdmin(admin.ModelAdmin):
 
                 self.message_user(request, "Аирдроп успешно отправлен и уведомления разосланы.")
             except Exception as e:
-                print(f"Ошибка при отправке уведомлений о аирдропе: {e}")
+                logger.error("Ошибка при отправке уведомлений о аирдропе: %s", e)
                 self.message_user(request, f"Ошибка при отправке уведомлений: {e}", level="error")
         else:
             self.message_user(request, "Аирдроп сохранен, но пользователи не найдены для отправки уведомлений.")
