@@ -38,11 +38,9 @@ services:
       - .:/backend
       - .:/bot/bot_backend
       - .:/bot
-    command:
-      - /bin/sh
-      - "-c"
-      - "./entrypoint_bot.sh"
+    command: bash entrypoint_bot.sh
     env_file: .env
 
 volumes:
   pg_data:
+  .:

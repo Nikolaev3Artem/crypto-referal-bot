@@ -2,7 +2,7 @@ import asyncio
 
 from backend.repositories.mailings_repo import mailing_repository
 from backend.services.user_service import UserService
-from bot.main.bot_instance import bot
+from bot.main.bot_instance import bot, logger
 
 
 class MailingService:
@@ -23,9 +23,9 @@ class MailingService:
 
             await mailing_repository.mark_as_sent(mailing)
 
-            print(f"Рассылка {mailing.id} успешно отправлена.")
+            logger.info("Рассылка %s успешно отправлена.", mailing.id)
         except Exception as e:
-            print(f"Ошибка при отправке рассылки {mailing.id}: {e}")
+            logger.warning("Ошибка при отправке рассылки %s : %s", mailing.id, e)
             raise
 
     async def send_message(self, user, message_template):
@@ -49,9 +49,9 @@ class MailingService:
                     formatted_message = message_template.format(**context)
                 except KeyError as ke:
                     formatted_message = f"Error formatting message: missing key {ke}"
-                    print(formatted_message)
+                    logger.warning("Сообщение об ошибке форматирования: отсутствует ключ %s", ke)
 
                 await self.bot.send_message(chat_id=user.user_id, text=formatted_message, parse_mode="HTML")
-                print(f"Сообщение успешно отправлено пользователю {user.user_id}")
+                logger.info("Сообщение успешно отправлено пользователю %s", user.user_id)
             except Exception as e:
-                print(f"Ошибка при отправке сообщения пользователю {user.user_id}: {e}")
+                logger.warning("Ошибка при отправке сообщения пользователю %s : %s", user.user_id, e)
